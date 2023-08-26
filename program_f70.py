@@ -33,6 +33,7 @@ class MainWindow(QMainWindow):
 		self.new_data_for_changing = ''
 		self.delete_check = 0
 		self.add_check = 2
+		self.selection_line = -1
 
 		self.mode_menu = 'searching'
 		self.dialog_menu_for_enter_add_button_answer = 1
@@ -94,7 +95,6 @@ class MainWindow(QMainWindow):
 
 		self.create_search_button()
 		self.create_add_button()
-		self.create_delete_button()
 		self.create_labels()
 		self.create_all_wind_in_body()
 
@@ -173,12 +173,88 @@ class MainWindow(QMainWindow):
 
 			self.all_wind_in_body += [one_line]
 
-	def create_delete_button(self):
-		self.delete_button = QPushButton(self)
-		self.delete_button.setCheckable(True)
-		self.delete_button.setGeometry(QRect(115, 0, 65, 20))
-		self.delete_button.setText("Удалить")
-		self.delete_button.clicked.connect(self.the_delete_button_was_clicked)
+	def input_error_wind(self, err):
+
+		self.dialog_error = QDialog(self)
+		self.dialog_error.setGeometry(QRect(self.screen_size[0]//2 - 115, self.screen_size[1]//2 - 50, 230, 100))
+		self.dialog_error.setWindowTitle("Ошибка ввода")
+
+		label_1 = QLabel("Неверно введено поле:", self.dialog_error)
+		label_1.setAlignment(Qt.AlignmentFlag.AlignCenter)
+		label_1.setFont(self.font_arial_size10)
+		label_1.setGeometry(QRect(0, 10, 230, 20))
+
+		label_2 = QLabel(self.russian_names_coloms[err], self.dialog_error)
+		label_2.setAlignment(Qt.AlignmentFlag.AlignCenter)
+		label_2.setFont(self.font_arial_size12)
+		label_2.setGeometry(QRect(0, 35, 230, 20))
+
+		ok_button = QPushButton(self.dialog_error)
+		ok_button.setCheckable(True)
+		ok_button.setGeometry(QRect(75, self.dialog_error.size().height() - 30, 80, 25))
+		ok_button.setText("OK")
+		ok_button.clicked.connect(lambda: self.dialog_error.hide())
+
+		self.dialog_error.exec()
+
+	def cheking_correctness_of_data(self, data):
+
+		result = -1
+		for index in range(15):
+			if result != -1: break
+
+			if index == 0:
+				if len(data[index]) > 10: result = index
+				try:
+					data_split = data[index].split("/")
+					if len(data_split) != 2: result = index
+					data_1 = int(data_split[0])
+					data_1 = int(data_split[1])
+				except ValueError: result = index
+
+			elif index in [2, 3, 4]:
+				if data[index] == '': result = index
+				if len(data[index]) > 20: result = index
+
+			elif index in [1, 5, 7, 14] and data[index] == '': result = index
+			elif index == 6 and len(data[index]) > 100: result = index
+
+			elif index == 8:
+				if data[index] == '': continue
+				if len(data[index]) != 16: result = index
+				try:
+					for i in range(16):
+						int(data[index][i])
+				except ValueError: result = index
+
+			elif index == 9:
+				if data[index] == '': continue
+				if len(data[index]) > 4: result = index
+				try:
+					for i in range(len(data[index])):
+						int(data[index][i])
+				except ValueError: result = index
+
+			elif index == 10:
+				if data[index] == '': continue
+				if len(data[index]) > 3: result = index
+				try:
+					for i in range(len(data[index])):
+						int(data[index][i])
+				except ValueError: result = index
+
+			elif index == 11 and (data[index] == '' or len(data[index]) > 50): result = index
+
+			elif index == 12:
+				if data[index] == '': result = index
+				if len(data[index]) > 10: result = index
+
+			elif index == 13 and len(data[index]) > 20: result = index
+
+		if result != -1:
+			self.input_error_wind(result)
+			return False
+		else: return True
 
 	def menu(self):
 
@@ -291,7 +367,7 @@ class MainWindow(QMainWindow):
 		self.page_line.setText(str(self.page_in_body))
 		self.page_line.textEdited.connect(self.change_page)
 
-		self.page_label = QLabel("/ " + str(len(self.all_data_saved) // self.count_of_lines_in_body + 1), self)
+		self.page_label = QLabel("/ " + str(len(self.all_data_saved) // (self.count_of_lines_in_body+1) + 1), self)
 		self.page_label.setGeometry(QRect(self.size().width() - 190, 170, 20, 35))
 		self.page_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 		self.page_label.setFont(self.font_arial_size12)
@@ -362,6 +438,8 @@ class MainWindow(QMainWindow):
 				self.line_changing = line
 				self.id_wind_changing = self.all_wind_in_body[line].index(sender)
 				break
+
+		self.selection_line = self.line_changing
 
 		self.dialog = QDialog(self)
 		self.dialog.setGeometry(QRect(self.screen_size[0]//2 - 155, self.screen_size[1]//2 - 100, 310, 200))
@@ -437,9 +515,11 @@ class MainWindow(QMainWindow):
 		cancel_button.clicked.connect(lambda: self.dialog.hide())
 
 		self.dialog.exec()
+
 		self.new_data_for_changing = ''
 		self.delete_check = 0
 		self.add_check = 2
+		self.selection_line = -1
 
 	def new_data_for_changing_in_string_or_date(self):
 		try:
@@ -465,12 +545,22 @@ class MainWindow(QMainWindow):
 
 		index_of_line = self.line_changing + (self.page_in_body - 1) * self.count_of_lines_in_body
 
-		if self.delete_check == 2:
+		line_for_check = []
+		for i in range(1, 16):
+			if i == self.id_wind_changing + 1: line_for_check += [self.new_data_for_changing]
+			else: line_for_check += [self.all_data_saved[index_of_line][i]]
+
+		if self.cheking_correctness_of_data(line_for_check) == False: return
+
+		if self.delete_check == 2 and self.add_check == 0:
 			sql_request = "DELETE FROM f70 WHERE id = %s"
 			cursor.execute(sql_request, [self.all_data_saved[index_of_line][0]])
 			self.all_data_saved.remove(self.all_data_saved[index_of_line])
+			self.page_label.setText("/ " + str(len(self.all_data_saved) // (self.count_of_lines_in_body+1) + 1))
+			if self.page_in_body > len(self.all_data_saved) // (self.count_of_lines_in_body + 1) + 1: self.page_in_body -= 1
+			self.page_line.setText(str(self.page_in_body))
 
-		if self.add_check == 2:
+		elif self.delete_check == 2 and self.add_check == 2:
 			sql_request = "UPDATE f70 \
 							SET " + self.english_names_coloms[self.id_wind_changing] + " = %s \
 							WHERE id = %s "
@@ -486,6 +576,28 @@ class MainWindow(QMainWindow):
 				else: new_line += [self.all_data_saved[index_of_line][i]]
 
 			self.all_data_saved[index_of_line] = tuple(new_line)
+
+		elif self.delete_check == 0 and self.add_check == 2:
+
+			sql_request = "INSERT INTO f70 (protocol_id, date_of_issue, second_name, first_name, \
+								surname, date_of_birth, address, \
+								disability, CHI, outpatient_card_id, site, diagnosis, \
+								code, doctor_second_name, type_f70) VALUES \
+								(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+
+			new_line = []
+			for i in range(1, 16):
+				if i == self.id_wind_changing + 1: new_line += [self.new_data_for_changing]
+				else: new_line += [self.all_data_saved[index_of_line][i]]
+
+			cursor.execute(sql_request, new_line)
+			cursor.execute("SELECT COUNT(id) FROM f70")
+			new_line = [cursor.fetchall()[0][0]] + new_line
+
+			self.all_data_saved += [tuple(new_line)]
+
+			self.page_label.setText("/ " + str(len(self.all_data_saved) // (self.count_of_lines_in_body+1) + 1))
+
 
 		self.dialog.hide()
 		self.delete_body_data()
@@ -539,7 +651,8 @@ class MainWindow(QMainWindow):
 		self.code_data = data
 
 	def get_doctor_second_name_data(self, data):
-		self.doctor_second_name_data = data
+		if len(data) == 0: self.doctor_second_name_data = ''
+		else: self.doctor_second_name_data = data + "%"
 
 	def get_type_f70_data(self, data):
 		if data == 0: self.type_f70_data = ''
@@ -555,6 +668,11 @@ class MainWindow(QMainWindow):
 		self.qp.setBrush(QColor(200, 200, 200))
 		self.qp.drawRect(0, 220, self.size().width(), self.size().height())
 
+		if self.selection_line != -1:
+			self.qp.setBrush(QColor(5, 64, 4))
+			self.qp.drawRect(0, self.line_changing * 30 + 252, self.size().width(), 30)
+
+
 		self.qp.setBrush(QColor(0, 0, 0))
 		self.qp.drawLine(0, 250, self.size().width(), 250)
 		self.qp.end()
@@ -567,17 +685,17 @@ class MainWindow(QMainWindow):
 
 		self.free_line_in_body = 0
 
-	def the_delete_button_was_clicked(self):
-		self.delete_button.setChecked(False)
-
 	def the_search_button_was_clicked(self):
 		self.search_button.setChecked(False)
 
 		self.delete_body_data()
 		self.all_data_saved = []
 		self.page_in_body = 1
-		self.page_label.setText("/ " + str(len(self.all_data_saved) // self.count_of_lines_in_body + 1))
+		self.page_label.setText("/ " + str(len(self.all_data_saved) // (self.count_of_lines_in_body+1) + 1))
 		self.page_line.setText(str(self.page_in_body))
+
+		for id_widg in range(15):
+			self.menu_widgets[id_widg].setStyleSheet("border: 2px solid black;")
 
 		if self.mode_menu == 'adding':
 			self.enter_add_button.hide()
@@ -635,7 +753,7 @@ class MainWindow(QMainWindow):
 			self.page_in_body = 1
 			cursor.execute(sql_request, data)
 			self.all_data_saved = cursor.fetchall()
-			self.page_label.setText("/ " + str(len(self.all_data_saved) // self.count_of_lines_in_body + 1))
+			self.page_label.setText("/ " + str(len(self.all_data_saved) // (self.count_of_lines_in_body+1) + 1))
 			self.page_line.setText(str(self.page_in_body))
 			self.add_data_from_db_in_body()
 
@@ -695,27 +813,29 @@ class MainWindow(QMainWindow):
 				else: 
 					data += [getattr(self, self.english_names_coloms[i] + '_data')]
 					data_for_search += [getattr(self, self.english_names_coloms[i] + '_data')]
-			else: data += [None]
+			else: data += ['']
 
-		cursor.execute(sql_request, data_for_search)
-		if len(cursor.fetchall()) > 0:
-			self.dialog_menu_for_enter_add_button_answer = 0
-			self.dialog_menu_for_enter_add_button()
+		if self.cheking_correctness_of_data(data):
 
-		if self.dialog_menu_for_enter_add_button_answer:
-			sql_request = "INSERT INTO f70 (protocol_id, date_of_issue, second_name, first_name, \
-								surname, date_of_birth, address, \
-								disability, CHI, outpatient_card_id, site, diagnosis, \
-								code, doctor_second_name, type_f70) VALUES \
-								(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-			if not first_add: 
-				cursor.execute(sql_request, data)
-				cursor.execute("SELECT COUNT(id) FROM f70")
-				data = [cursor.fetchall()[0][0]] + data
-				self.all_data_saved += [data]
-				self.page_label.setText("/ " + str(len(self.all_data_saved) // self.count_of_lines_in_body + 1))
-				self.page_line.setText(str(self.page_in_body))
-				self.add_one_line_in_body(-1)
+			cursor.execute(sql_request, data_for_search)
+			if len(cursor.fetchall()) > 0:
+				self.dialog_menu_for_enter_add_button_answer = 0
+				self.dialog_menu_for_enter_add_button()
+
+			if self.dialog_menu_for_enter_add_button_answer:
+				sql_request = "INSERT INTO f70 (protocol_id, date_of_issue, second_name, first_name, \
+									surname, date_of_birth, address, \
+									disability, CHI, outpatient_card_id, site, diagnosis, \
+									code, doctor_second_name, type_f70) VALUES \
+									(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+				if not first_add: 
+					cursor.execute(sql_request, data)
+					cursor.execute("SELECT COUNT(id) FROM f70")
+					data = [cursor.fetchall()[0][0]] + data
+					self.all_data_saved += [data]
+					self.page_label.setText("/ " + str(len(self.all_data_saved) // (self.count_of_lines_in_body+1) + 1))
+					self.page_line.setText(str(self.page_in_body))
+					self.add_one_line_in_body(-1)
 
 		self.dialog_menu_for_enter_add_button_answer = 1
 
@@ -762,7 +882,7 @@ class MainWindow(QMainWindow):
 		try: int(data)
 		except ValueError: return
 
-		if int(data) <= len(self.all_data_saved) // self.count_of_lines_in_body + 1:
+		if int(data) <= len(self.all_data_saved) // (self.count_of_lines_in_body + 1) + 1:
 			self.page_in_body = int(data)
 			self.delete_body_data()
 			self.add_data_from_db_in_body()
@@ -774,8 +894,12 @@ class MainWindow(QMainWindow):
 		self.delete_body_data()
 		self.all_data_saved = []
 		self.page_in_body = 1
-		self.page_label.setText("/ " + str(len(self.all_data_saved) // self.count_of_lines_in_body + 1))
+		self.page_label.setText("/ " + str(len(self.all_data_saved) // (self.count_of_lines_in_body+1) + 1))
 		self.page_line.setText(str(self.page_in_body))
+
+		for id_widg in range(15):
+			if id_widg not in [6, 8, 9, 10, 13]:
+				self.menu_widgets[id_widg].setStyleSheet("background-color: #578f56; border: 2px solid black;")
 
 		if self.mode_menu == 'searching':
 			self.enter_search_button.hide()
@@ -799,6 +923,24 @@ if __name__ == "__main__":
 	cursor = conn.cursor()
 
 	conn.autocommit = True
+
+	cursor.execute("CREATE TABLE IF NOT EXISTS f70 (id SERIAL PRIMARY KEY NOT NULL, \
+												protocol_id VARCHAR(10) NOT NULL, \
+												date_of_issue DATE NOT NULL,\
+												first_name VARCHAR(20) NOT NULL,\
+												second_name VARCHAR(20) NOT NULL,\
+												surname VARCHAR(20) NOT NULL,\
+												date_of_birth DATE NOT NULL,\
+												address VARCHAR(100),\
+												disability VARCHAR(11) NOT NULL,\
+												CHI VARCHAR(16),\
+												outpatient_card_id VARCHAR(4),\
+												site VARCHAR(3),\
+												diagnosis VARCHAR(50) NOT NULL,\
+												code VARCHAR(10) NOT NULL,\
+												doctor_second_name VARCHAR(20),\
+												type_f70 VARCHAR(30) NOT NULL) ")
+
 
 	window = MainWindow()
 	window.show()
