@@ -522,10 +522,10 @@ class MainWindow(QMainWindow):
 		self.selection_line = -1
 
 	def new_data_for_changing_in_string_or_date(self):
-		try:
-			self.new_data_for_changing = datetime.strptime(self.line_for_changing.toPlainText(), '%d.%m.%Y').date()
-		except:
-			self.new_data_for_changing = self.line_for_changing.toPlainText()
+		if self.id_wind_changing in [1, 5]:
+			try: self.new_data_for_changing = datetime.strptime(self.line_for_changing.toPlainText(), '%d.%m.%Y').date()
+			except ValueError: self.new_data_for_changing = ''
+		else: self.new_data_for_changing = self.line_for_changing.toPlainText()
 
 	def new_data_for_changing_in_index(self, data):
 		if self.id_wind_changing == 7:
@@ -545,13 +545,6 @@ class MainWindow(QMainWindow):
 
 		index_of_line = self.line_changing + (self.page_in_body - 1) * self.count_of_lines_in_body
 
-		line_for_check = []
-		for i in range(1, 16):
-			if i == self.id_wind_changing + 1: line_for_check += [self.new_data_for_changing]
-			else: line_for_check += [self.all_data_saved[index_of_line][i]]
-
-		if self.cheking_correctness_of_data(line_for_check) == False: return
-
 		if self.delete_check == 2 and self.add_check == 0:
 			sql_request = "DELETE FROM f70 WHERE id = %s"
 			cursor.execute(sql_request, [self.all_data_saved[index_of_line][0]])
@@ -561,19 +554,26 @@ class MainWindow(QMainWindow):
 			self.page_line.setText(str(self.page_in_body))
 
 		elif self.delete_check == 2 and self.add_check == 2:
+
+			new_line = []
+			for i in range(16):
+				if i == self.id_wind_changing + 1: new_line += [self.new_data_for_changing]
+				else: new_line += [self.all_data_saved[index_of_line][i]]
+
+			if self.cheking_correctness_of_data(new_line[1:]) == False: return
+
 			sql_request = "UPDATE f70 \
 							SET " + self.english_names_coloms[self.id_wind_changing] + " = %s \
 							WHERE id = %s "
 
 			cursor.execute(sql_request, [self.new_data_for_changing, self.all_data_saved[index_of_line][0]])
 
-			self.all_wind_in_body[self.line_changing][self.id_wind_changing].setText(self.new_data_for_changing)
+			if self.id_wind_changing in [1, 5]:
+				self.all_wind_in_body[self.line_changing][self.id_wind_changing].setText(\
+					self.new_data_for_changing.strftime("%d.%m.%Y"))
+			else:
+				self.all_wind_in_body[self.line_changing][self.id_wind_changing].setText(self.new_data_for_changing)
 			self.all_wind_in_body[self.line_changing][self.id_wind_changing].setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-			new_line = []
-			for i in range(16):
-				if i == self.id_wind_changing + 1: new_line += [self.new_data_for_changing]
-				else: new_line += [self.all_data_saved[index_of_line][i]]
 
 			self.all_data_saved[index_of_line] = tuple(new_line)
 
@@ -590,14 +590,17 @@ class MainWindow(QMainWindow):
 				if i == self.id_wind_changing + 1: new_line += [self.new_data_for_changing]
 				else: new_line += [self.all_data_saved[index_of_line][i]]
 
+			if self.cheking_correctness_of_data(new_line) == False: return
+
 			cursor.execute(sql_request, new_line)
 			cursor.execute("SELECT COUNT(id) FROM f70")
+
+			new_line[1] = new_line[1].strftime("%d.%m.%Y")
+			new_line[5] = new_line[5].strftime("%d.%m.%Y")
 			new_line = [cursor.fetchall()[0][0]] + new_line
 
 			self.all_data_saved += [tuple(new_line)]
-
 			self.page_label.setText("/ " + str(len(self.all_data_saved) // (self.count_of_lines_in_body+1) + 1))
-
 
 		self.dialog.hide()
 		self.delete_body_data()
