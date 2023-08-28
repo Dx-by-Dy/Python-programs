@@ -9,6 +9,9 @@ from PyQt6.QtWidgets import QApplication, QLabel, QWidget, QMainWindow, QPushBut
 							QMessageBox, QMenu, QCheckBox
 from PyQt6.QtGui import QPainter, QColor, QBrush, QFont, QAction
 
+def sort_func(item):
+	return item[3], item[4], item[5], datetime.now().date() - item[2]
+
 class MainWindow(QMainWindow):
 	def __init__(self):
 		super().__init__()
@@ -159,12 +162,13 @@ class MainWindow(QMainWindow):
 				print_data_line.setAlignment(Qt.AlignmentFlag.AlignCenter)
 				print_data_line.setMouseTracking(True)
 				print_data_line.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+				print_data_line.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 				print_data_line.customContextMenuRequested.connect(self.custom_context_menu_for_body_data)
 
 				if i in [2, 3, 4, 6, 8, 11]: print_data_line.setFont(self.font_arial_size8)
 				else: print_data_line.setFont(self.font_arial_size10)
 
-				print_data_line.setStyleSheet("border: 1px solid black; background-color:" + "#888888;")
+				print_data_line.setStyleSheet("border: 1px solid black; background-color: #888888;")
 				print_data_line.setReadOnly(True)
 				print_data_line.hide()
 
@@ -284,6 +288,7 @@ class MainWindow(QMainWindow):
 				input_line.textChanged.connect(getattr(self, 'get_' + self.english_names_coloms[i] + '_data'))
 				input_line.setAlignment(Qt.AlignmentFlag.AlignCenter)
 				input_line.setFont(self.font_arial_size8)
+				input_line.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
 			else:
 				input_line = QLineEdit(self)
@@ -314,7 +319,6 @@ class MainWindow(QMainWindow):
 		self.enter_search_button.setStyleSheet("background-color: #009900; border-radius: 10px; \
 												border: 1px solid black;")
 
-
 		self.enter_add_button = QPushButton(self)
 		self.enter_add_button.setCheckable(True)
 		self.enter_add_button.setGeometry(QRect(self.size().width() - 145, 170, 130, 35))
@@ -325,7 +329,6 @@ class MainWindow(QMainWindow):
 		self.enter_add_button.setStyleSheet("background-color: #0000aa; border-radius: 10px; \
 												border: 1px solid black;")
 		self.enter_add_button.hide()
-
 		
 		self.clear_all_menu_button = QPushButton(self)
 		self.clear_all_menu_button.setCheckable(True)
@@ -337,6 +340,15 @@ class MainWindow(QMainWindow):
 		self.clear_all_menu_button.setStyleSheet("background-color: #bbbbbb; border-radius: 10px; \
 												border: 1px solid black;")
 
+		self.show_all_data_in_db_button = QPushButton(self)
+		self.show_all_data_in_db_button.setCheckable(True)
+		self.show_all_data_in_db_button.setGeometry(QRect(20, 130, 100, 35))
+		self.show_all_data_in_db_button.setText("Показать всю таблицу")
+		self.show_all_data_in_db_button.clicked.connect(self.the_show_all_data_in_db_button_was_clicked)
+		self.show_all_data_in_db_button.setFont(self.font_arial_size7)
+		self.show_all_data_in_db_button.setMouseTracking(True)
+		self.show_all_data_in_db_button.setStyleSheet("background-color: #bbbbbb; border-radius: 10px; \
+												border: 1px solid black;")
 
 		self.page_down_button = QPushButton(self)
 		self.page_down_button.setCheckable(True)
@@ -347,7 +359,6 @@ class MainWindow(QMainWindow):
 		self.page_down_button.setMouseTracking(True)
 		self.page_down_button.setStyleSheet("background-color: #bbbbbb; border-radius: 10px; \
 												border: 1px solid black;")
-
 
 		self.page_up_button = QPushButton(self)
 		self.page_up_button.setCheckable(True)
@@ -381,6 +392,13 @@ class MainWindow(QMainWindow):
 														border: 1px solid black;")
 		elif self.mouse_pos not in QRect(20, 170, 100, 35): 
 			self.clear_all_menu_button.setStyleSheet("background-color: #bbbbbb; border-radius: 10px; \
+														border: 1px solid black;")
+
+		if self.mouse_pos in QRect(20, 130, 100, 35):
+			self.show_all_data_in_db_button.setStyleSheet("background-color: #777777; border-radius: 10px; \
+														border: 1px solid black;")
+		elif self.mouse_pos not in QRect(20, 130, 100, 35): 
+			self.show_all_data_in_db_button.setStyleSheet("background-color: #bbbbbb; border-radius: 10px; \
 														border: 1px solid black;")
 		
 		if self.mouse_pos in QRect(self.size().width() - 260, 170, 35, 35):
@@ -456,6 +474,7 @@ class MainWindow(QMainWindow):
 		line_1.setFont(self.font_arial_size12)
 		line_1.setStyleSheet("background-color: #ffffff; border: 1px solid black;")
 		line_1.setReadOnly(True)
+		line_1.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
 		label_2 = QLabel("Новые данные: ", self.dialog)
 		label_2.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -476,6 +495,7 @@ class MainWindow(QMainWindow):
 			self.line_for_changing = QTextEdit(self.dialog)
 			self.line_for_changing.setAlignment(Qt.AlignmentFlag.AlignCenter)
 			self.line_for_changing.textChanged.connect(self.new_data_for_changing_in_string_or_date)
+			self.line_for_changing.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
 		self.line_for_changing.setGeometry(QRect(120, 50, 180, 28))
 		self.line_for_changing.setFont(self.font_arial_size12)
@@ -522,9 +542,13 @@ class MainWindow(QMainWindow):
 		self.selection_line = -1
 
 	def new_data_for_changing_in_string_or_date(self):
+
 		if self.id_wind_changing in [1, 5]:
 			try: self.new_data_for_changing = datetime.strptime(self.line_for_changing.toPlainText(), '%d.%m.%Y').date()
 			except ValueError: self.new_data_for_changing = ''
+		elif self.id_wind_changing in [2, 3, 4, 13]: self.new_data_for_changing = self.line_for_changing.toPlainText().title()
+		elif self.id_wind_changing == 6: self.new_data_for_changing = self.line_for_changing.toPlainText().capitalize()
+		elif self.id_wind_changing == 11: self.new_data_for_changing = self.line_for_changing.toPlainText().lower()
 		else: self.new_data_for_changing = self.line_for_changing.toPlainText()
 
 	def new_data_for_changing_in_index(self, data):
@@ -549,6 +573,7 @@ class MainWindow(QMainWindow):
 			sql_request = "DELETE FROM f70 WHERE id = %s"
 			cursor.execute(sql_request, [self.all_data_saved[index_of_line][0]])
 			self.all_data_saved.remove(self.all_data_saved[index_of_line])
+
 			self.page_label.setText("/ " + str(len(self.all_data_saved) // (self.count_of_lines_in_body+1) + 1))
 			if self.page_in_body > len(self.all_data_saved) // (self.count_of_lines_in_body + 1) + 1: self.page_in_body -= 1
 			self.page_line.setText(str(self.page_in_body))
@@ -595,13 +620,12 @@ class MainWindow(QMainWindow):
 			cursor.execute(sql_request, new_line)
 			cursor.execute("SELECT COUNT(id) FROM f70")
 
-			new_line[1] = new_line[1].strftime("%d.%m.%Y")
-			new_line[5] = new_line[5].strftime("%d.%m.%Y")
 			new_line = [cursor.fetchall()[0][0]] + new_line
 
 			self.all_data_saved += [tuple(new_line)]
 			self.page_label.setText("/ " + str(len(self.all_data_saved) // (self.count_of_lines_in_body+1) + 1))
 
+		self.all_data_saved.sort(key = sort_func)
 		self.dialog.hide()
 		self.delete_body_data()
 		self.add_data_from_db_in_body()
@@ -614,15 +638,16 @@ class MainWindow(QMainWindow):
 		except ValueError: self.date_of_issue_data = ''
 
 	def get_second_name_data(self):
-		if self.menu_widgets[2].toPlainText() != '': self.second_name_data = self.menu_widgets[2].toPlainText() + "%"
+		if self.menu_widgets[2].toPlainText() != '': 
+			self.second_name_data = self.menu_widgets[2].toPlainText().title() + "%"
 		else: self.second_name_data = self.menu_widgets[2].toPlainText()
 
 	def get_first_name_data(self):
-		if self.menu_widgets[3].toPlainText() != '': self.first_name_data = self.menu_widgets[3].toPlainText() + "%"
+		if self.menu_widgets[3].toPlainText() != '': self.first_name_data = self.menu_widgets[3].toPlainText().title() + "%"
 		else: self.first_name_data = self.menu_widgets[3].toPlainText()
 
 	def get_surname_data(self):
-		if self.menu_widgets[4].toPlainText() != '': self.surname_data = self.menu_widgets[4].toPlainText() + "%"
+		if self.menu_widgets[4].toPlainText() != '': self.surname_data = self.menu_widgets[4].toPlainText().title() + "%"
 		else: self.surname_data = self.menu_widgets[4].toPlainText()
 
 	def get_date_of_birth_data(self, data):
@@ -630,7 +655,8 @@ class MainWindow(QMainWindow):
 		except ValueError: self.date_of_birth_data = ''
 
 	def get_address_data(self):
-		if self.menu_widgets[6].toPlainText() != '': self.address_data = self.menu_widgets[6].toPlainText() + "%"
+		if self.menu_widgets[6].toPlainText() != '': 
+			self.address_data = self.menu_widgets[6].toPlainText().capitalize() + "%"
 		else: self.address_data = self.menu_widgets[6].toPlainText()
 
 	def get_disability_data(self, data):
@@ -647,7 +673,7 @@ class MainWindow(QMainWindow):
 		self.site_data = data
 
 	def get_diagnosis_data(self):
-		if self.menu_widgets[11].toPlainText() != '': self.diagnosis_data = self.menu_widgets[11].toPlainText() + "%"
+		if self.menu_widgets[11].toPlainText() != '': self.diagnosis_data = self.menu_widgets[11].toPlainText().lower() + "%"
 		else: self.diagnosis_data = self.menu_widgets[11].toPlainText()
 
 	def get_code_data(self, data):
@@ -655,7 +681,7 @@ class MainWindow(QMainWindow):
 
 	def get_doctor_second_name_data(self, data):
 		if len(data) == 0: self.doctor_second_name_data = ''
-		else: self.doctor_second_name_data = data + "%"
+		else: self.doctor_second_name_data = data.title() + "%"
 
 	def get_type_f70_data(self, data):
 		if data == 0: self.type_f70_data = ''
@@ -707,6 +733,21 @@ class MainWindow(QMainWindow):
 
 		self.enter_search_button.show()
 
+	def the_show_all_data_in_db_button_was_clicked(self):
+
+		self.delete_body_data()
+		self.all_data_saved = []
+
+		sql_request = "SELECT * FROM f70 ORDER BY second_name, first_name, surname, date_of_issue DESC"
+
+		cursor.execute(sql_request)
+		self.all_data_saved = cursor.fetchall()
+
+		self.page_in_body = 1
+		self.page_label.setText("/ " + str(len(self.all_data_saved) // (self.count_of_lines_in_body+1) + 1))
+		self.page_line.setText(str(self.page_in_body))
+		self.add_data_from_db_in_body()
+
 	def add_one_line_in_body(self, id_data):
 
 		if self.free_line_in_body < self.count_of_lines_in_body:
@@ -748,7 +789,7 @@ class MainWindow(QMainWindow):
 				else: sql_request += " = %s "
 				data += [getattr(self, self.english_names_coloms[i] + '_data')]
 
-		sql_request += "ORDER BY second_name, first_name, surname "
+		sql_request += "ORDER BY second_name, first_name, surname, date_of_issue DESC "
 
 		if not first_add: 
 			self.delete_body_data()
@@ -835,10 +876,15 @@ class MainWindow(QMainWindow):
 					cursor.execute(sql_request, data)
 					cursor.execute("SELECT COUNT(id) FROM f70")
 					data = [cursor.fetchall()[0][0]] + data
+
 					self.all_data_saved += [data]
+					self.all_data_saved.sort(key = sort_func)
+
 					self.page_label.setText("/ " + str(len(self.all_data_saved) // (self.count_of_lines_in_body+1) + 1))
 					self.page_line.setText(str(self.page_in_body))
-					self.add_one_line_in_body(-1)
+
+					self.delete_body_data()
+					self.add_data_from_db_in_body()
 
 		self.dialog_menu_for_enter_add_button_answer = 1
 
@@ -926,7 +972,6 @@ if __name__ == "__main__":
 	cursor = conn.cursor()
 
 	conn.autocommit = True
-
 	cursor.execute("CREATE TABLE IF NOT EXISTS f70 (id SERIAL PRIMARY KEY NOT NULL, \
 												protocol_id VARCHAR(10) NOT NULL, \
 												date_of_issue DATE NOT NULL,\
@@ -943,7 +988,6 @@ if __name__ == "__main__":
 												code VARCHAR(10) NOT NULL,\
 												doctor_second_name VARCHAR(20),\
 												type_f70 VARCHAR(30) NOT NULL) ")
-
 
 	window = MainWindow()
 	window.show()
