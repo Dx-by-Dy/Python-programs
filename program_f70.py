@@ -28,6 +28,7 @@ class MainWindow(QMainWindow):
 		self.all_data_saved = []
 		self.all_wind_in_body = []
 		self.menu_widgets = []
+		self.menu_labels = []
 		self.page_in_body = 1
 		self.free_line_in_body = 0
 		self.count_of_lines_in_body = 18
@@ -77,15 +78,27 @@ class MainWindow(QMainWindow):
 		self.disability_items = ['-', 'инв I гр.', 'инв II гр.', 'инв III гр.', 'раб.', 'не раб.', 'реб. инв.']
 		self.type_f70_items = ['-', 'органы дыхания', 'органы опор-дв. апп.', 'органы ССС', 'органы эндок. сист.', \
 								'органы нерв. сист.', 'другое']
+		self.type_report_items = ['Взрослые', 'Дети', 'Инвалиды']
+		self.year_report_items = [str(year) for year in range(int(datetime.now().strftime("%Y")), 1999, -1)]
+		self.period_report_items = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', \
+									'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь', 'Январь - Март', \
+									'Январь - Июнь', 'Январь - Сентябрь', 'Год']
+
+		self.report_type = self.type_report_items[0]
+		self.report_year = self.year_report_items[0]
+		self.report_period = 1
+		self.report_type_f70 = ''
+		self.report_info = [0, 0, 0, 0, 0, 0, 0]
+
 
 		self.x_len_labels = []
 		for i in range(15):
-			if i == 4: self.x_len_labels += [120] # +15
-			elif i == 6: self.x_len_labels += [150] # 150
+			if i == 4: self.x_len_labels += [120]
+			elif i == 6: self.x_len_labels += [150]
 			elif i == 8: self.x_len_labels += [125]
 			elif i == 9: self.x_len_labels += [80]
 			elif i == 11: self.x_len_labels += [130]
-			elif i == 12: self.x_len_labels += [60] # 60
+			elif i == 12: self.x_len_labels += [60]
 			elif i == 14: self.x_len_labels += [130]
 			else: self.x_len_labels += [100]
 
@@ -98,6 +111,7 @@ class MainWindow(QMainWindow):
 
 		self.create_search_button()
 		self.create_add_button()
+		self.create_report_button()
 		self.create_labels()
 		self.create_all_wind_in_body()
 
@@ -145,8 +159,12 @@ class MainWindow(QMainWindow):
 		self.add_button.setText("Добавить")
 		self.add_button.clicked.connect(self.the_add_button_was_clicked)
 
-		#self.add_button_list = QComboBox(self)
-		#self.add_button_list.addItems([''])
+	def create_report_button(self):
+		self.report_button = QPushButton(self)
+		self.report_button.setCheckable(True)
+		self.report_button.setGeometry(QRect(115, 0, 50, 20))
+		self.report_button.setText("Отчеты")
+		self.report_button.clicked.connect(self.the_report_button_was_clicked)
 
 	def create_all_wind_in_body(self):
 
@@ -305,9 +323,42 @@ class MainWindow(QMainWindow):
 			input_label.setGeometry(QRect(x_coord, 50, self.x_len_labels[i], 30))
 			input_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 			input_label.setFont(self.font_arial_size8)
+			self.menu_labels += [input_label]
 
 			x_coord += self.x_len_labels[i] + 5
 
+
+		self.report_type_line = QComboBox(self)
+		self.report_type_line.addItems(self.type_report_items)
+		self.report_type_line.activated.connect(self.get_report_type_data)
+		self.report_type_line.setFont(self.font_arial_size10)
+		self.report_type_line.setGeometry(QRect(20, 30, 100, 25))
+		self.report_type_line.setStyleSheet("background-color: #57cf77; border: 2px solid black;")
+		self.report_type_line.hide()
+
+		self.report_year_line = QComboBox(self)
+		self.report_year_line.addItems(self.year_report_items)
+		self.report_year_line.activated.connect(self.get_report_year_data)
+		self.report_year_line.setFont(self.font_arial_size10)
+		self.report_year_line.setGeometry(QRect(130, 30, 100, 25))
+		self.report_year_line.setStyleSheet("background-color: #57cf77; border: 2px solid black;")
+		self.report_year_line.hide()
+
+		self.report_period_line = QComboBox(self)
+		self.report_period_line.addItems(self.period_report_items)
+		self.report_period_line.activated.connect(self.get_report_period_data)
+		self.report_period_line.setFont(self.font_arial_size10)
+		self.report_period_line.setGeometry(QRect(240, 30, 140, 25))
+		self.report_period_line.setStyleSheet("background-color: #57cf77; border: 2px solid black;")
+		self.report_period_line.hide()
+
+		self.report_type_f70_line = QComboBox(self)
+		self.report_type_f70_line.addItems(self.type_f70_items)
+		self.report_type_f70_line.activated.connect(self.get_report_type_f70_data)
+		self.report_type_f70_line.setFont(self.font_arial_size10)
+		self.report_type_f70_line.setGeometry(QRect(390, 30, 130, 25))
+		self.report_type_f70_line.setStyleSheet("border: 2px solid black;")
+		self.report_type_f70_line.hide()
 
 		self.enter_search_button = QPushButton(self)
 		self.enter_search_button.setCheckable(True)
@@ -329,6 +380,17 @@ class MainWindow(QMainWindow):
 		self.enter_add_button.setStyleSheet("background-color: #0000aa; border-radius: 10px; \
 												border: 1px solid black;")
 		self.enter_add_button.hide()
+
+		self.enter_report_button = QPushButton(self)
+		self.enter_report_button.setCheckable(True)
+		self.enter_report_button.setGeometry(QRect(self.size().width() - 145, 170, 130, 35))
+		self.enter_report_button.setText("Расшифровать")
+		self.enter_report_button.clicked.connect(self.the_enter_report_button_was_clicked)
+		self.enter_report_button.setFont(self.font_arial_size12)
+		self.enter_report_button.setMouseTracking(True)
+		self.enter_report_button.setStyleSheet("background-color: #f7ca4d; border-radius: 10px; \
+												border: 1px solid black;")
+		self.enter_report_button.hide()
 		
 		self.clear_all_menu_button = QPushButton(self)
 		self.clear_all_menu_button.setCheckable(True)
@@ -431,12 +493,22 @@ class MainWindow(QMainWindow):
 				self.enter_add_button.setStyleSheet("background-color: #0000aa; border-radius: 10px; \
 														border: 1px solid black;")
 
+		elif self.mode_menu == 'reporting':
+			if self.mouse_pos in QRect(self.size().width() - 145, 170, 130, 35):
+				self.enter_report_button.setStyleSheet("background-color: #755705; border-radius: 10px; \
+														border: 1px solid black;")
+			elif self.mouse_pos not in QRect(self.size().width() - 145, 170, 130, 35): 
+				self.enter_report_button.setStyleSheet("background-color: #f7ca4d; border-radius: 10px; \
+														border: 1px solid black;")
+
+
 	def keyPressEvent(self, e):
 
 		if e.modifiers() == Qt.KeyboardModifier.ControlModifier:
 			if e.key() == Qt.Key.Key_Enter.value - 1:
 				if self.mode_menu == 'searching': self.the_enter_search_button_was_clicked()
 				elif self.mode_menu == 'adding': self.the_enter_add_button_was_clicked()
+				elif self.mode_menu == 'reporting': self.the_enter_report_button_was_clicked()
 			elif e.key() == Qt.Key.Key_Space.value: self.the_clear_all_menu_button_was_clicked()
 		elif e.key() == Qt.Key.Key_Down.value: self.the_page_down_button_was_clicked()
 		elif e.key() == Qt.Key.Key_Up.value:  self.the_page_up_button_was_clicked()
@@ -446,6 +518,23 @@ class MainWindow(QMainWindow):
 		print(e.position())
 		print(e.button() == Qt.MouseButton.RightButton)
 	'''
+
+	def get_report_type_data(self, data):
+		self.report_type = self.type_report_items[data]
+
+	def get_report_year_data(self, data):
+		self.report_year = self.year_report_items[data]
+
+	def get_report_period_data(self, data):
+		if data <= 11: self.report_period = data + 1
+		elif data == 12: self.report_period = 3
+		elif data == 13: self.report_period = 6
+		elif data == 14: self.report_period = 9
+		elif data == 15: self.report_period = 12
+
+	def get_report_type_f70_data(self, data):
+		if data == 0: self.report_type_f70 = ''
+		else: self.report_type_f70 = self.type_f70_items[data]
 
 	def custom_context_menu_for_body_data(self, pos):
 
@@ -723,15 +812,50 @@ class MainWindow(QMainWindow):
 		self.page_label.setText("/ " + str(len(self.all_data_saved) // (self.count_of_lines_in_body+1) + 1))
 		self.page_line.setText(str(self.page_in_body))
 
-		for id_widg in range(15):
-			self.menu_widgets[id_widg].setStyleSheet("border: 2px solid black;")
+		for index in range(15):
+			self.menu_labels[index].show()
+			self.menu_widgets[index].show()
+			self.menu_widgets[index].setStyleSheet("border: 2px solid black;")
 
 		if self.mode_menu == 'adding':
 			self.enter_add_button.hide()
+		if self.mode_menu == 'reporting':
+			self.enter_report_button.hide()
+			self.report_period_line.hide()
+			self.report_year_line.hide()
+			self.report_type_line.hide()
+			self.report_type_f70_line.hide()
 
 		self.mode_menu = 'searching'
 
 		self.enter_search_button.show()
+
+	def the_report_button_was_clicked(self):
+		self.report_button.setChecked(False)
+
+		self.delete_body_data()
+		self.all_data_saved = []
+		self.page_in_body = 1
+		self.page_label.setText("/ " + str(len(self.all_data_saved) // (self.count_of_lines_in_body+1) + 1))
+		self.page_line.setText(str(self.page_in_body))
+
+		for index in range(15):
+			self.menu_widgets[index].hide()
+			self.menu_labels[index].hide()
+
+		if self.mode_menu == 'adding':
+			self.enter_add_button.hide()
+
+		elif self.mode_menu == 'searching':
+			self.enter_search_button.hide()
+
+		self.mode_menu = 'reporting'
+
+		self.report_period_line.show()
+		self.report_year_line.show()
+		self.report_type_line.show()
+		self.enter_report_button.show()
+		self.report_type_f70_line.show()
 
 	def the_show_all_data_in_db_button_was_clicked(self):
 
@@ -837,10 +961,7 @@ class MainWindow(QMainWindow):
 
 	def the_enter_add_button_was_clicked(self):
 
-		sql_request = "SELECT id, protocol_id, date_of_issue, second_name, first_name, \
-								surname, date_of_birth, address, \
-								disability, CHI, outpatient_card_id, site, diagnosis, \
-								code, doctor_second_name, type_f70 FROM f70 "
+		sql_request = "SELECT * FROM f70 "
 		
 		first_add = True
 		data = []
@@ -910,6 +1031,36 @@ class MainWindow(QMainWindow):
 		self.doctor_second_name_data = ''
 		self.type_f70_data = ''
 
+	def the_enter_report_button_was_clicked(self):
+		sql_request = "SELECT * FROM f70 WHERE date_part('year', date_of_issue) = %s "
+
+		if self.report_type == 'Взрослые': sql_request += "and date_part('year', age(date_of_birth)) >= 18 "
+		elif self.report_type == 'Дети': sql_request += "and date_part('year', age(date_of_birth)) < 18 "
+		else: sql_request += "and disability IN ('инв I гр.', 'инв II гр.', 'инв III гр.', 'реб. инв.') "
+
+		sql_request += "and date_part('mons', date_of_issue) BETWEEN 1 and %s "
+
+		cursor.execute(sql_request, [self.report_year, self.report_period])
+
+		self.all_data_saved = []
+
+		new_data = cursor.fetchall()
+		self.report_info = [len(new_data), 0, 0, 0, 0, 0, 0]
+
+		for line in new_data:
+			self.report_info[self.type_f70_items.index(line[15])] += 1
+			if self.report_type_f70 != '':
+				if line[15] == self.report_type_f70: self.all_data_saved += [line]
+			else: self.all_data_saved += [line]
+
+		self.page_in_body = 1
+
+		self.page_label.setText("/ " + str(len(self.all_data_saved) // (self.count_of_lines_in_body+1) + 1))
+		self.page_line.setText(str(self.page_in_body))
+
+		self.delete_body_data()
+		self.add_data_from_db_in_body()
+
 	def the_page_down_button_was_clicked(self):
 
 		if self.page_in_body * self.count_of_lines_in_body < len(self.all_data_saved):
@@ -946,17 +1097,23 @@ class MainWindow(QMainWindow):
 		self.page_label.setText("/ " + str(len(self.all_data_saved) // (self.count_of_lines_in_body+1) + 1))
 		self.page_line.setText(str(self.page_in_body))
 
-		for id_widg in range(15):
-			if id_widg not in [6, 8, 9, 10, 13]:
-				self.menu_widgets[id_widg].setStyleSheet("background-color: #578f56; border: 2px solid black;")
+		for index in range(15):
+			self.menu_widgets[index].show()
+			self.menu_labels[index].show()
+			if index not in [6, 8, 9, 10, 13]:
+				self.menu_widgets[index].setStyleSheet("background-color: #57cf77; border: 2px solid black;")
 
 		if self.mode_menu == 'searching':
 			self.enter_search_button.hide()
+		elif self.mode_menu == 'reporting':
+			self.enter_report_button.hide()
+			self.report_period_line.hide()
+			self.report_year_line.hide()
+			self.report_type_line.hide()
+			self.report_type_f70_line.hide()
 
 		self.mode_menu = 'adding'
 		self.enter_add_button.show()
-
-
 		#self.get_file_name()
 
 	def get_file_name(self):
