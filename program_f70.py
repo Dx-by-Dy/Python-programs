@@ -1,7 +1,9 @@
-from os import sys
+from os import sys, startfile
 import ctypes
 import psycopg2
-from openpyxl import load_workbook
+from openpyxl import load_workbook, Workbook
+from openpyxl.utils.cell import get_column_letter as letter
+from openpyxl.styles import Alignment, Font
 from datetime import datetime
 from PyQt6.QtCore import QSize, Qt, QRect, QPoint
 from PyQt6.QtWidgets import QApplication, QLabel, QWidget, QMainWindow, QPushButton, QVBoxLayout, \
@@ -91,6 +93,7 @@ class MainWindow(QMainWindow):
 		self.report_type = self.type_report_items[0]
 		self.report_year = self.year_report_items[0]
 		self.report_period = 1
+		self.report_period_type = 'mons'
 		self.report_type_f70 = ''
 		self.report_info = [0, 0, 0, 0, 0, 0, 0]
 
@@ -420,6 +423,17 @@ class MainWindow(QMainWindow):
 		self.enter_report_button.setStyleSheet("background-color: #f7ca4d; border-radius: 10px; \
 												border: 1px solid black;")
 		self.enter_report_button.hide()
+
+		self.report_in_excel_button = QPushButton(self)
+		self.report_in_excel_button.setCheckable(True)
+		self.report_in_excel_button.setGeometry(QRect(20, 170, 100, 35))
+		self.report_in_excel_button.setText("Отчет в Excel")
+		self.report_in_excel_button.clicked.connect(self.the_report_in_excel_button_was_clicked)
+		self.report_in_excel_button.setFont(self.font_arial_size10)
+		self.report_in_excel_button.setMouseTracking(True)
+		self.report_in_excel_button.setStyleSheet("background-color: #bbbbbb; border-radius: 10px; \
+												border: 1px solid black;")
+		self.report_in_excel_button.hide()
 		
 		self.clear_all_menu_button = QPushButton(self)
 		self.clear_all_menu_button.setCheckable(True)
@@ -481,8 +495,12 @@ class MainWindow(QMainWindow):
 		if self.mouse_pos in QRect(20, 170, 100, 35):
 			self.clear_all_menu_button.setStyleSheet("background-color: #777777; border-radius: 10px; \
 														border: 1px solid black;")
+			self.report_in_excel_button.setStyleSheet("background-color: #777777; border-radius: 10px; \
+														border: 1px solid black;")
 		elif self.mouse_pos not in QRect(20, 170, 100, 35): 
 			self.clear_all_menu_button.setStyleSheet("background-color: #bbbbbb; border-radius: 10px; \
+														border: 1px solid black;")
+			self.report_in_excel_button.setStyleSheet("background-color: #bbbbbb; border-radius: 10px; \
 														border: 1px solid black;")
 
 		if self.mouse_pos in QRect(20, 130, 100, 35):
@@ -530,7 +548,6 @@ class MainWindow(QMainWindow):
 				self.enter_report_button.setStyleSheet("background-color: #f7ca4d; border-radius: 10px; \
 														border: 1px solid black;")
 
-
 	def keyPressEvent(self, e):
 
 		if e.modifiers() == Qt.KeyboardModifier.ControlModifier:
@@ -559,11 +576,15 @@ class MainWindow(QMainWindow):
 			self.report_info_lines[i].setText('')
 
 	def get_report_period_data(self, data):
-		if data <= 11: self.report_period = data + 1
-		elif data == 12: self.report_period = 3
-		elif data == 13: self.report_period = 6
-		elif data == 14: self.report_period = 9
-		elif data == 15: self.report_period = 12
+		if data <= 11: 
+			self.report_period = data + 1
+			self.report_period_type = 'mons'
+		else:
+			self.report_period_type = 'period'
+			if data == 12: self.report_period = 3
+			elif data == 13: self.report_period = 6
+			elif data == 14: self.report_period = 9
+			elif data == 15: self.report_period = 12
 
 		for i in range(7):
 			self.report_info_lines[i].setText('')
@@ -863,6 +884,7 @@ class MainWindow(QMainWindow):
 			self.report_type_f70_line.hide()
 			self.clear_all_menu_button.show()
 			self.show_all_data_in_db_button.show()
+			self.report_in_excel_button.hide()
 
 			for index in range(7):
 				self.report_info_lines[index].hide()
@@ -898,6 +920,7 @@ class MainWindow(QMainWindow):
 		self.report_type_line.show()
 		self.enter_report_button.show()
 		self.report_type_f70_line.show()
+		self.report_in_excel_button.show()
 
 		for index in range(7):
 			self.report_info_lines[index].show()
@@ -1087,7 +1110,8 @@ class MainWindow(QMainWindow):
 		elif self.report_type == 'Дети': sql_request += "and date_part('year', age(date_of_birth)) < 18 "
 		else: sql_request += "and disability IN ('инв I гр.', 'инв II гр.', 'инв III гр.', 'реб. инв.') "
 
-		sql_request += "and date_part('mons', date_of_issue) BETWEEN 1 and %s "
+		if self.report_period_type == 'period': sql_request += "and date_part('mons', date_of_issue) BETWEEN 1 and %s "
+		else: sql_request += "and date_part('mons', date_of_issue) = %s "
 
 		cursor.execute(sql_request, [self.report_year, self.report_period])
 
@@ -1112,6 +1136,71 @@ class MainWindow(QMainWindow):
 
 		self.delete_body_data()
 		self.add_data_from_db_in_body()
+
+	def the_report_in_excel_button_was_clicked(self):
+		self.the_enter_report_button_was_clicked()
+		if len(self.all_data_saved) != 0:
+			wb = Workbook()
+			ws = wb.active
+
+			title = "Отчет_" + self.report_type + "_"
+			if self.report_period_type == "mons": title += self.period_report_items[self.report_period-1]
+			else:
+				if self.report_period == 3: title += self.period_report_items[12]
+				elif self.report_period == 6: title += self.period_report_items[13]
+				elif self.report_period == 9: title += self.period_report_items[14]
+				elif self.report_period == 12: title += self.period_report_items[15]
+			title += "_" + self.report_year
+			ws.title = "Отчет"
+
+			for i in range(16):
+				if i == 0: ws.column_dimensions[letter(i+1)].width = 20
+				else: ws.column_dimensions[letter(i+1)].width = 15
+
+			ws['H1'] = self.report_type
+			ws['I1'] = title.split('_')[2]
+			ws['J1'] = int(self.report_year)
+			ws['A2'] = ''
+
+			for i in range(7):
+				if i == 0: 
+					ws['A'+str(i+3)] = "Всего"
+					ws['A'+str(i+3)].font = Font(bold=True)
+					ws['B'+str(i+3)].font = Font(bold=True)
+				else: ws['A'+str(i+3)] = self.type_f70_items[i]
+				ws['B'+str(i+3)] = self.report_info[i]
+
+			ws['A10'] = ''
+
+			sorted_data = {'органы дыхания' : [], 'органы опор-дв. апп.' : [], 'органы ССС' : [], \
+							'органы эндок. сист.' : [], 'органы нерв. сист.' : [], 'другое' : []}
+			for i in range(6):
+				for line in self.all_data_saved:
+					if line[15] == self.type_f70_items[i+1]:
+						sorted_data[self.type_f70_items[i+1]] += [list(line)]
+
+			y_coord = 11
+			for key in sorted_data.keys():
+				cnt_of_line = 1
+				ws['I'+str(y_coord)] = key
+				ws['I'+str(y_coord)].font = Font(bold=True)
+				ws.append(['№'] + self.russian_names_coloms)
+				y_coord += 2
+				for line in sorted_data[key]:
+					ws.append([cnt_of_line] + line[1:])
+					cnt_of_line += 1
+					y_coord += 1
+				ws['A'+str(y_coord)] = ''
+				y_coord += 1
+
+			for row in ws.rows:
+				for cell in row:
+					cell.alignment = Alignment(horizontal="center", vertical="center")
+
+			wb.save(title + '.xlsx')
+			way = QFileDialog.getOpenFileName(self, "Выбрать файл", ".", "Excel (" + title + ".xlsx)")
+			startfile(way[0])
+
 
 	def the_page_down_button_was_clicked(self):
 
@@ -1165,6 +1254,7 @@ class MainWindow(QMainWindow):
 			self.report_type_f70_line.hide()
 			self.clear_all_menu_button.show()
 			self.show_all_data_in_db_button.show()
+			self.report_in_excel_button.hide()
 
 			for index in range(7):
 				self.report_info_lines[index].hide()
