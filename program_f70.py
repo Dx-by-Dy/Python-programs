@@ -18,6 +18,8 @@ class MainWindow(QMainWindow):
 
 		self.font_arial_size7 = QFont("Arial", 7)
 		self.font_arial_size8 = QFont("Arial", 8)
+		self.font_arial_size8_bold = QFont("Arial", 8)
+		self.font_arial_size8_bold.setBold(True)
 		self.font_arial_size10 = QFont("Arial", 10)
 		self.font_arial_size12 = QFont("Arial", 12)
 		self.font_arial_size15 = QFont("Arial", 15)
@@ -29,6 +31,8 @@ class MainWindow(QMainWindow):
 		self.all_wind_in_body = []
 		self.menu_widgets = []
 		self.menu_labels = []
+		self.report_info_lines = []
+		self.report_info_labels = []
 		self.page_in_body = 1
 		self.free_line_in_body = 0
 		self.count_of_lines_in_body = 18
@@ -360,6 +364,31 @@ class MainWindow(QMainWindow):
 		self.report_type_f70_line.setStyleSheet("border: 2px solid black;")
 		self.report_type_f70_line.hide()
 
+
+		for i in range(7):	
+			info_line = QLineEdit(self)
+			info_line.setAlignment(Qt.AlignmentFlag.AlignCenter)
+			info_line.setFont(self.font_arial_size10)
+			info_line.setGeometry(QRect(20 + 120*i, 65, 110, 25))
+			if i == 0: info_line.setStyleSheet("border: 2px solid black;")
+			else: info_line.setStyleSheet("border: 1px solid black;")
+			info_line.setReadOnly(True)
+			info_line.hide()
+
+			if i == 0: 
+				info_label = QLabel('Всего', self)
+				info_label.setFont(self.font_arial_size8_bold)
+			else: 
+				info_label = QLabel(self.type_f70_items[i], self)
+				info_label.setFont(self.font_arial_size8)
+			info_label.setGeometry(QRect(20 + 120*i, 90, 110, 30))
+			info_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+			info_label.hide()
+
+			self.report_info_lines += [info_line]
+			self.report_info_labels += [info_label]
+
+
 		self.enter_search_button = QPushButton(self)
 		self.enter_search_button.setCheckable(True)
 		self.enter_search_button.setGeometry(QRect(self.size().width() - 145, 170, 130, 35))
@@ -521,9 +550,13 @@ class MainWindow(QMainWindow):
 
 	def get_report_type_data(self, data):
 		self.report_type = self.type_report_items[data]
+		for i in range(7):
+			self.report_info_lines[i].setText('')
 
 	def get_report_year_data(self, data):
 		self.report_year = self.year_report_items[data]
+		for i in range(7):
+			self.report_info_lines[i].setText('')
 
 	def get_report_period_data(self, data):
 		if data <= 11: self.report_period = data + 1
@@ -531,6 +564,9 @@ class MainWindow(QMainWindow):
 		elif data == 13: self.report_period = 6
 		elif data == 14: self.report_period = 9
 		elif data == 15: self.report_period = 12
+
+		for i in range(7):
+			self.report_info_lines[i].setText('')
 
 	def get_report_type_f70_data(self, data):
 		if data == 0: self.report_type_f70 = ''
@@ -825,6 +861,12 @@ class MainWindow(QMainWindow):
 			self.report_year_line.hide()
 			self.report_type_line.hide()
 			self.report_type_f70_line.hide()
+			self.clear_all_menu_button.show()
+			self.show_all_data_in_db_button.show()
+
+			for index in range(7):
+				self.report_info_lines[index].hide()
+				self.report_info_labels[index].hide()
 
 		self.mode_menu = 'searching'
 
@@ -856,6 +898,13 @@ class MainWindow(QMainWindow):
 		self.report_type_line.show()
 		self.enter_report_button.show()
 		self.report_type_f70_line.show()
+
+		for index in range(7):
+			self.report_info_lines[index].show()
+			self.report_info_labels[index].show()
+
+		self.clear_all_menu_button.hide()
+		self.show_all_data_in_db_button.hide()
 
 	def the_show_all_data_in_db_button_was_clicked(self):
 
@@ -1053,6 +1102,9 @@ class MainWindow(QMainWindow):
 				if line[15] == self.report_type_f70: self.all_data_saved += [line]
 			else: self.all_data_saved += [line]
 
+		for i in range(7):
+			self.report_info_lines[i].setText(str(self.report_info[i]))
+
 		self.page_in_body = 1
 
 		self.page_label.setText("/ " + str(len(self.all_data_saved) // (self.count_of_lines_in_body+1) + 1))
@@ -1111,6 +1163,12 @@ class MainWindow(QMainWindow):
 			self.report_year_line.hide()
 			self.report_type_line.hide()
 			self.report_type_f70_line.hide()
+			self.clear_all_menu_button.show()
+			self.show_all_data_in_db_button.show()
+
+			for index in range(7):
+				self.report_info_lines[index].hide()
+				self.report_info_labels[index].hide()
 
 		self.mode_menu = 'adding'
 		self.enter_add_button.show()
