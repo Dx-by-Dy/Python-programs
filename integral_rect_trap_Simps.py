@@ -99,25 +99,55 @@ def Newton_Cotes(a : mpf, b : mpf, count_of_separation : mpf, count_of_nodes : m
 
 	return result
 
-def score_err_rate(list_of_value_integr : list[mpf], ADA : mpf) -> list[mpf]:
+def Aitken_process(coef_of_splitting : mpf, type_method : str) -> int:
+	coef_of_splitting = coef_of_splitting - coef_of_splitting%8
+
+	if type_method == 'Newton_Cotes':
+		value_int_3 = Newton_Cotes(a, b, coef_of_splitting//2, 3)
+		value_int_2 = Newton_Cotes(a, b, coef_of_splitting//4, 3)
+		value_int_1 = Newton_Cotes(a, b, coef_of_splitting//8, 3)
+
+	elif type_method == 'Gauss':
+		value_int_3 = Gauss(a, b, coef_of_splitting//2)
+		value_int_2 = Gauss(a, b, coef_of_splitting//4)
+		value_int_1 = Gauss(a, b, coef_of_splitting//8)
+
+	return int(nint(-log((value_int_3 - value_int_2)/(value_int_2 - value_int_1))/log(2)))
+
+def get_optimal_step(ADA : mpf, best_err_rate : mpf, count_of_separation : mpf) -> mpf:
+	step = (b-a)/(count_of_separation*2)
+	return step*(epsilon/best_err_rate)**(1/ADA)
+
+def score_err_rate(list_of_value_integr : list[mpf], ADA : mpf, type_method : str, offset_h : mpf = 0) -> list[mpf]:
+	global verified_value_of_int_func, verified_value_of_int_full_func, step_epsilon_Newton_Cotes, step_epsilon_Gauss, \
+		cnt_epsilon_Newton_Cotes, cnt_epsilon_Gauss
+
 	cnt_value = len(list_of_value_integr)
 
-	#matrix_A = matrix([[((b-a)/((j+1)*2))**(ADA+i) if i != cnt_value-1 else -1 for i in range(cnt_value)] for j in range(cnt_value)])
-	#b_vector = matrix([-list_of_value_integr[i] for i in range(cnt_value)])
-
-	#err_rate_coef = lu_solve(matrix_A, b_vector)
-
 	err_rate = [0]*cnt_value
-	for iterat in range(cnt_value//5):
-		matrix_A = matrix([[((b-a)/((j+1)*2))**(ADA+i) if i != cnt_value-1 else -1 for i in range(5)] for j in range(5*iterat, 5*(iterat+1))])
-		b_vector = matrix([-list_of_value_integr[i] for i in range(5*iterat, 5*(iterat+1))])
+	deg_system = 5
+	for iterat in range(cnt_value//deg_system):
+		matrix_A = matrix([[((b-a)/((offset_h+j+1)*2))**(ADA+i) if i != deg_system-1 else -1 for i in range(deg_system)] for j in range(deg_system*iterat, deg_system*(iterat+1))])
+		b_vector = matrix([-list_of_value_integr[i] for i in range(deg_system*iterat, deg_system*(iterat+1))])
 
 		err_rate_coef = lu_solve(matrix_A, b_vector)
 
-		for i in range(5):
-			for j in range(4):
-				err_rate[5*iterat + i] += err_rate_coef[j]*matrix_A[i, j]
-			err_rate[5*iterat + i] = abs(err_rate[5*iterat + i])
+		for i in range(deg_system):
+			for j in range(deg_system-1):
+				err_rate[deg_system*iterat + i] += err_rate_coef[j]*matrix_A[i, j]
+			err_rate[deg_system*iterat + i] = abs(err_rate[deg_system*iterat + i])
+
+			if type_method in ['trapezoid', 'Simpsons']: verified_value_of_int_func = err_rate[deg_system*iterat + i] + list_of_value_integr[deg_system*iterat + i]
+			else: 
+				verified_value_of_int_full_func = err_rate[deg_system*iterat + i] + list_of_value_integr[deg_system*iterat + i]
+				if type_method == 'Newton_Cotes' and err_rate[deg_system*iterat + i] < epsilon and step_epsilon_Newton_Cotes == None: 
+					step_epsilon_Newton_Cotes = (b-a)/((offset_h + deg_system*iterat + i + 1)*2)
+					cnt_epsilon_Newton_Cotes = offset_h + deg_system*iterat + i + 1
+				elif type_method == 'Gauss' and err_rate[deg_system*iterat + i] < epsilon and step_epsilon_Gauss == None: 
+					step_epsilon_Gauss = (b-a)/((offset_h + deg_system*iterat + i + 1)*2)
+					cnt_epsilon_Gauss = offset_h + deg_system*iterat + i + 1
+
+			#err_rate[5*iterat + i] = abs(err_rate_coef[4] - list_of_value_integr[5*iterat + i])
 
 	return err_rate
 
@@ -131,18 +161,7 @@ def grafics(index : int) -> None:
 
 		log_func = lambda x: log(x, 10)
 		ax = [i+1 for i in range(max_count_of_separation_for_index_0)]
-
-		'''
-		axis[0].plot(ax, err_rate_left_rect, "g", label = "Левый прямоугольник")
-		axis[0].plot(ax, err_rate_right_rect, "r", label = "Правый прямоугольник")
-		axis[0].plot(ax, err_rate_average_rect, "k", label = "Средний прямоугольник")
-		axis[0].set_title("Абсолютная погрешность левого, правого и среднего прямоульных формул от эталонных формул")
-		axis[0].set_xlabel("Количество разбиений")
-		axis[0].set_ylabel("Абсолютная погрешность")
-		#axis[0].set_xticks(ax, ax)
-		axis[0].grid()
-		axis[0].legend()
-		'''
+		x_ax = [1] + [10*(i+1) for i in range(max_count_of_separation_for_index_0//10)]
 
 		axis.plot(ax, list(map(log_func, err_rate_left_rect)), "g", label = "Левый прямоугольник")
 		axis.plot(ax, list(map(log_func, err_rate_right_rect)), "r", label = "Правый прямоугольник")
@@ -150,7 +169,7 @@ def grafics(index : int) -> None:
 		axis.set_title("Степень погрешности левого, правого и среднего прямоульных формул от эталонных формул")
 		axis.set_xlabel("Количество разбиений")
 		axis.set_ylabel("Степень погрешности")
-		#axis.set_xticks(ax, ax)
+		axis.set_xticks(x_ax, x_ax)
 		axis.grid()
 		axis.legend()
 
@@ -158,26 +177,17 @@ def grafics(index : int) -> None:
 
 		log_func = lambda x: log(x, 10)
 		ax = [i+1 for i in range(max_count_of_separation_for_index_1)]
+		x_ax = [1] + [10*(i+1) for i in range(max_count_of_separation_for_index_1//10)]
 
-		'''
-		axis[0].plot(ax, err_rate_trapezoid, "g", label = "Формула трапеции")
-		axis[0].plot(ax, err_rate_Simpsons, "r", label = "Формула Симпсона")
-		axis[0].set_title("Абсолютная погрешность формулы трапеции и формулы Симпсона от эталонных формул")
-		axis[0].set_xlabel("Количество разбиений")
-		axis[0].set_ylabel("Абсолютная погрешность")
-		#axis[0].set_xticks(ax, ax)
-		axis[0].grid()
-		axis[0].legend()
-		'''
-
-		axis.plot(ax, list(map(log_func, err_rate_trapezoid)), "g", label = "Формула трапеции")
-		axis.plot(ax, list(map(log_func, score_err_rate(err_rate_trapezoid, 1))), "--k", label = "Оценка точности формулы трапеции по Ричардсону")
-		axis.plot(ax, list(map(log_func, err_rate_Simpsons)), "r", label = "Формула Симпсона")
-		axis.plot(ax, list(map(log_func, score_err_rate(err_rate_Simpsons, 2))), "--b", label = "Оценка точности формулы Симпсона по Ричардсону")
-		axis.set_title("Степень погрешности формулы трапеции и формулы Симпсона от эталонных формул")
+		axis.plot(ax, list(map(log_func, err_rate_trapezoid)), "g", label = "Степень погрешности формулы трапеции от эталонной")
+		axis.plot(ax, list(map(log_func, score_err_rate_for_trapezoid)), "--k", label = "Степень погрешности формулы трапеции по Ричардсону")
+		axis.plot(ax, list(map(log_func, err_rate_Simpsons)), "r", label = "Степень погрешности формула Симпсона от эталонной")
+		axis.plot(ax, list(map(log_func, score_err_rate_for_Simpsons)), "--b", label = "Степень погрешности формулы Симпсона по Ричардсону")
+		axis.plot(ax, [log(abs(quad(func, [a, b]) - verified_value_of_int_func), 10)]*max_count_of_separation_for_index_1, 'k', label = 'Степень погрешности уточненного значения интеграла от эталонного')
+		axis.set_title("Степень погрешности формулы трапеции и формулы Симпсона от эталонных формул и оценка погрешности")
 		axis.set_xlabel("Количество разбиений")
 		axis.set_ylabel("Степень погрешности")
-		#axis.set_xticks(ax, ax)
+		axis.set_xticks(x_ax, x_ax)
 		axis.grid()
 		axis.legend()
 
@@ -185,26 +195,23 @@ def grafics(index : int) -> None:
 
 		log_func = lambda x: log(x, 10)
 		ax = [i+1 for i in range(max_count_of_separation_for_index_2)]
+		x_ax = [1] + [10*(i+1) for i in range(max_count_of_separation_for_index_2//10)]
+		if cnt_epsilon_Newton_Cotes != None: x_ax = sorted(x_ax + [cnt_epsilon_Newton_Cotes])
+		if cnt_epsilon_Gauss != None: x_ax = sorted(x_ax + [cnt_epsilon_Gauss])
 
-		'''
-		axis[0].plot(ax, err_rate_Newton_Cotes, "g", label = "Формула Ньютона-Котеса")
-		axis[0].plot(ax, err_rate_Gauss, "r", label = "Формула Гаусса")
-		axis[0].set_title("Абсолютная погрешность формулы Ньютона-Котеса и формулы Гаусса от эталонных формул")
-		axis[0].set_xlabel("Количество разбиений")
-		axis[0].set_ylabel("Абсолютная погрешность")
-		#axis[0].set_xticks(ax, ax)
-		axis[0].grid()
-		axis[0].legend()
-		'''
+		optimal_step_Newton_Cotes = get_optimal_step(Aitken_process(max_count_of_separation_for_index_2, 'Newton_Cotes'), score_err_rate_for_Newton_Cotes[-1], max_count_of_separation_for_index_2)
+		optimal_step_Gauss = get_optimal_step(Aitken_process(max_count_of_separation_for_index_2, 'Gauss'), score_err_rate_for_Gauss[-1], max_count_of_separation_for_index_2)
 
-		axis.plot(ax, list(map(log_func, err_rate_Newton_Cotes)), "g", label = "Формула Ньютона-Котеса")
-		axis.plot(ax, list(map(log_func, score_err_rate(err_rate_Newton_Cotes, 2))), "--k", label = "Оценка точности формулы Ньютона-Котеса по Ричардсону")
-		axis.plot(ax, list(map(log_func, err_rate_Gauss)), "r", label = "Формула Гаусса")
-		axis.plot(ax, list(map(log_func, score_err_rate(err_rate_Gauss, 6))), "--b", label = "Оценка точности формулы Гаусса по Ричардсону")
-		axis.set_title("Степень погрешности формулы Ньютона-Котеса и формулы Гаусса от эталонных формул")
+		axis.plot(ax, list(map(log_func, err_rate_Newton_Cotes)), "g", label = "Степень погрешности формулы Ньютона-Котеса от эталонной")
+		axis.plot(ax, list(map(log_func, score_err_rate_for_Newton_Cotes)), "--k", label = "Степень погрешности формулы Ньютона-Котеса по Ричардсону")
+		axis.plot(ax, list(map(log_func, err_rate_Gauss)), "r", label = "Степень погрешности формулы Гаусса от эталонной")
+		axis.plot(ax, list(map(log_func, score_err_rate_for_Gauss)), "--b", label = "Степень погрешности формулы Гаусса по Ричардсону")
+		axis.plot(ax, [log(abs(quad(full_func, [a, b]) - verified_value_of_int_full_func), 10)]*max_count_of_separation_for_index_2, 'k', label = 'Степень погрешности уточненного значения интеграла от эталонного')
+		axis.plot(ax, list(map(log_func, [epsilon]*max_count_of_separation_for_index_2)), "m", label = "Требуемая степень точности ($\\epsilon = { 10}^{" + str(int(log(epsilon, 10))) +"}, h_{ opt}^{ N-C} ≈ " + nstr(optimal_step_Newton_Cotes, 3) +", h_{ opt}^{ G} ≈ " + nstr(optimal_step_Gauss, 3) + "$)")
+		axis.set_title("Степень погрешности формулы Ньютона-Котеса(ACT ≈ " + str(Aitken_process(max_count_of_separation_for_index_2, 'Newton_Cotes')) + ", $h_\\epsilon$ = " + nstr(step_epsilon_Newton_Cotes, 3) + ") и формулы Гаусса(ACT ≈ " + str(Aitken_process(max_count_of_separation_for_index_2, 'Gauss')) + ", $h_\\epsilon$ = " + nstr(step_epsilon_Gauss, 3) + ") от эталонных формул и оценка погрешности")
 		axis.set_xlabel("Количество разбиений")
 		axis.set_ylabel("Степень погрешности")
-		#axis.set_xticks(ax, ax)
+		axis.set_xticks(x_ax, x_ax)
 		axis.grid()
 		axis.legend()
 
@@ -214,8 +221,10 @@ def grafics(index : int) -> None:
 def key_event(event) -> None:
 	global index, max_count_of_separation_for_index_0, max_count_of_separation_for_index_1, \
 		max_count_of_separation_for_index_2, err_rate_left_rect, err_rate_right_rect, err_rate_average_rect, \
-		err_rate_trapezoid, err_rate_Simpsons, err_rate_Newton_Cotes, err_rate_Gauss
-
+		err_rate_trapezoid, err_rate_Simpsons, err_rate_Newton_Cotes, err_rate_Gauss, \
+		value_int_with_left_rect, value_int_with_right_rect, value_int_with_average_rect, value_int_with_trapezoid, \
+		value_int_with_Simpsons, value_int_with_Newton_Cotes, value_int_with_Gauss, score_err_rate_for_trapezoid, \
+		score_err_rate_for_Simpsons, score_err_rate_for_Newton_Cotes, score_err_rate_for_Gauss
 
 	key = getattr(event, 'key')
 
@@ -223,32 +232,34 @@ def key_event(event) -> None:
 	elif key == 'left': index = (index - 1)%3
 	elif key == 'up': 
 		if index == 0: 
-			max_count_of_separation_for_index_0 += 1
-			err_rate_left_rect += [abs(quad(func, [a, b]) - left_rect(a, b, max_count_of_separation_for_index_0))]
-			err_rate_right_rect += [abs(quad(func, [a, b]) - right_rect(a, b, max_count_of_separation_for_index_0))]
-			err_rate_average_rect += [abs(quad(func, [a, b]) - average_rect(a, b, max_count_of_separation_for_index_0))]
+			value_int_with_left_rect += [left_rect(a, b, max_count_of_separation_for_index_0+i+1) for i in range(10)]
+			value_int_with_right_rect += [right_rect(a, b, max_count_of_separation_for_index_0+i+1) for i in range(10)]
+			value_int_with_average_rect += [average_rect(a, b, max_count_of_separation_for_index_0+i+1) for i in range(10)]
+
+			err_rate_left_rect += [abs(int_value_for_func - value_int_with_left_rect[max_count_of_separation_for_index_0 + i]) for i in range(10)]
+			err_rate_right_rect += [abs(int_value_for_func - value_int_with_right_rect[max_count_of_separation_for_index_0 + i]) for i in range(10)]
+			err_rate_average_rect += [abs(int_value_for_func - value_int_with_average_rect[max_count_of_separation_for_index_0 + i]) for i in range(10)]
+			max_count_of_separation_for_index_0 += 10
 		elif index == 1: 
-			max_count_of_separation_for_index_1 += 1
-			err_rate_trapezoid += [abs(quad(func, [a, b]) - trapezoid(a, b, max_count_of_separation_for_index_1))]
-			err_rate_Simpsons += [abs(quad(func, [a, b]) - Simpsons(a, b, max_count_of_separation_for_index_1))]
+			value_int_with_trapezoid += [trapezoid(a, b, max_count_of_separation_for_index_1+i+1) for i in range(10)]
+			value_int_with_Simpsons += [Simpsons(a, b, max_count_of_separation_for_index_1+i+1) for i in range(10)]
+
+			score_err_rate_for_trapezoid += score_err_rate(value_int_with_trapezoid[max_count_of_separation_for_index_1:], 2, 'trapezoid', max_count_of_separation_for_index_1)
+			score_err_rate_for_Simpsons += score_err_rate(value_int_with_Simpsons[max_count_of_separation_for_index_1:], 3, 'Simpsons', max_count_of_separation_for_index_1)
+
+			err_rate_trapezoid += [abs(int_value_for_func - value_int_with_trapezoid[max_count_of_separation_for_index_1 + i]) for i in range(10)]
+			err_rate_Simpsons += [abs(int_value_for_func - value_int_with_Simpsons[max_count_of_separation_for_index_1 + i]) for i in range(10)]
+			max_count_of_separation_for_index_1 += 10
 		elif index == 2:
-			max_count_of_separation_for_index_2 += 1
-			err_rate_Newton_Cotes += [abs(quad(full_func, [a, b]) - Newton_Cotes(a, b, max_count_of_separation_for_index_2, 3))]
-			err_rate_Gauss += [abs(quad(full_func, [a, b]) - Gauss(a, b, max_count_of_separation_for_index_2))]
-	elif key == 'down': 
-		if index == 0 and max_count_of_separation_for_index_0 > 1: 
-			max_count_of_separation_for_index_0 -= 1
-			err_rate_left_rect = err_rate_left_rect[:-1]
-			err_rate_right_rect = err_rate_right_rect[:-1]
-			err_rate_average_rect = err_rate_average_rect[:-1]
-		elif index == 1 and max_count_of_separation_for_index_1 > 1: 
-			max_count_of_separation_for_index_1 -= 1
-			err_rate_trapezoid = err_rate_trapezoid[:-1]
-			err_rate_Simpsons = err_rate_Simpsons[:-1]
-		elif index == 2 and max_count_of_separation_for_index_2 > 1:
-			max_count_of_separation_for_index_2 -= 1
-			err_rate_Newton_Cotes = err_rate_Newton_Cotes[:-1] 
-			err_rate_Gauss = err_rate_Gauss[:-1] 
+			value_int_with_Newton_Cotes += [Newton_Cotes(a, b, max_count_of_separation_for_index_2+i+1, 3) for i in range(10)]
+			value_int_with_Gauss += [Gauss(a, b, max_count_of_separation_for_index_2+i+1) for i in range(10)]
+
+			score_err_rate_for_Newton_Cotes += score_err_rate(value_int_with_Newton_Cotes[max_count_of_separation_for_index_2:], 3, 'Newton_Cotes', max_count_of_separation_for_index_2)
+			score_err_rate_for_Gauss += score_err_rate(value_int_with_Gauss[max_count_of_separation_for_index_2:], 6, 'Gauss', max_count_of_separation_for_index_2)
+
+			err_rate_Newton_Cotes += [abs(int_value_for_full_func - value_int_with_Newton_Cotes[max_count_of_separation_for_index_2 + i]) for i in range(10)]
+			err_rate_Gauss += [abs(int_value_for_full_func - value_int_with_Gauss[max_count_of_separation_for_index_2 + i]) for i in range(10)]
+			max_count_of_separation_for_index_2 += 10
 
 	grafics(index)
 
@@ -266,7 +277,7 @@ if __name__ == "__main__":
 	alpha, bbeta = mpf(0), mpf(0.25)
 	max_count_of_separation_for_index_0 = 10
 	max_count_of_separation_for_index_1 = 10
-	max_count_of_separation_for_index_2 = 100
+	max_count_of_separation_for_index_2 = 10
 	index = 0
 
 	weight_func = lambda x: 1/((b-x)**bbeta)
@@ -274,15 +285,36 @@ if __name__ == "__main__":
 
 	int_value_for_func = quad(func, [a, b])
 	int_value_for_full_func = quad(full_func, [a, b])
+	verified_value_of_int_func = None
+	verified_value_of_int_full_func = None
+	epsilon = 1e-6
+
+	step_epsilon_Newton_Cotes = None
+	step_epsilon_Gauss = None
+	cnt_epsilon_Newton_Cotes = None
+	cnt_epsilon_Gauss = None
 	#print(quad(full_func, [a, b], error = True))
 
-	err_rate_left_rect = [abs(int_value_for_func - left_rect(a, b, i+1)) for i in range(max_count_of_separation_for_index_0)]
-	err_rate_right_rect = [abs(int_value_for_func - right_rect(a, b, i+1)) for i in range(max_count_of_separation_for_index_0)]
-	err_rate_average_rect = [abs(int_value_for_func - average_rect(a, b, i+1)) for i in range(max_count_of_separation_for_index_0)]
-	err_rate_trapezoid = [abs(int_value_for_func - trapezoid(a, b, i+1)) for i in range(max_count_of_separation_for_index_1)]
-	err_rate_Simpsons = [abs(int_value_for_func - Simpsons(a, b, i+1)) for i in range(max_count_of_separation_for_index_1)]
-	err_rate_Newton_Cotes = [abs(int_value_for_full_func - Newton_Cotes(a, b, i+1, 3)) for i in range(max_count_of_separation_for_index_2)]
-	err_rate_Gauss = [abs(int_value_for_full_func - Gauss(a, b, i+1)) for i in range(max_count_of_separation_for_index_2)]
+	value_int_with_left_rect = [left_rect(a, b, i+1) for i in range(max_count_of_separation_for_index_0)]
+	value_int_with_right_rect = [right_rect(a, b, i+1) for i in range(max_count_of_separation_for_index_0)]
+	value_int_with_average_rect = [average_rect(a, b, i+1) for i in range(max_count_of_separation_for_index_0)]
+	value_int_with_trapezoid = [trapezoid(a, b, i+1) for i in range(max_count_of_separation_for_index_1)]
+	value_int_with_Simpsons = [Simpsons(a, b, i+1) for i in range(max_count_of_separation_for_index_1)]
+	value_int_with_Newton_Cotes = [Newton_Cotes(a, b, i+1, 3) for i in range(max_count_of_separation_for_index_2)]
+	value_int_with_Gauss = [Gauss(a, b, i+1) for i in range(max_count_of_separation_for_index_2)]
+
+	score_err_rate_for_trapezoid = score_err_rate(value_int_with_trapezoid, 2, 'trapezoid')
+	score_err_rate_for_Simpsons = score_err_rate(value_int_with_Simpsons, 3, 'Simpsons')
+	score_err_rate_for_Newton_Cotes = score_err_rate(value_int_with_Newton_Cotes, 3, 'Newton_Cotes')
+	score_err_rate_for_Gauss = score_err_rate(value_int_with_Gauss, 5, 'Gauss')
+
+	err_rate_left_rect = [abs(int_value_for_func - value_int_with_left_rect[i]) for i in range(max_count_of_separation_for_index_0)]
+	err_rate_right_rect = [abs(int_value_for_func - value_int_with_right_rect[i]) for i in range(max_count_of_separation_for_index_0)]
+	err_rate_average_rect = [abs(int_value_for_func - value_int_with_average_rect[i]) for i in range(max_count_of_separation_for_index_0)]
+	err_rate_trapezoid = [abs(int_value_for_func - value_int_with_trapezoid[i]) for i in range(max_count_of_separation_for_index_1)]
+	err_rate_Simpsons = [abs(int_value_for_func - value_int_with_Simpsons[i]) for i in range(max_count_of_separation_for_index_1)]
+	err_rate_Newton_Cotes = [abs(int_value_for_full_func - value_int_with_Newton_Cotes[i]) for i in range(max_count_of_separation_for_index_2)]
+	err_rate_Gauss = [abs(int_value_for_full_func - value_int_with_Gauss[i]) for i in range(max_count_of_separation_for_index_2)]
 
 	fg, axis = plt.subplots(nrows= 1, ncols= 1, figsize=(15, 8))
 	fg.subplots_adjust(bottom=0.1, left=0.06, right=0.98, top=0.95, hspace=0.3)
