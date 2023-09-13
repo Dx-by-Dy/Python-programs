@@ -1,7 +1,5 @@
 from mpmath import *
 import matplotlib.pyplot as plt
-from numpy.linalg import solve
-from numpy import array
 
 def left_rect(a : mpf, b : mpf, count_of_separation : mpf) -> mpf:
 	step = (b-a)/count_of_separation
