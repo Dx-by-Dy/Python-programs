@@ -9,6 +9,9 @@ class RatNum(object):
 	deno : int
 	_DesimalPrint = False
 
+	#def __call__(self, numrt : int, deno : int = 1):
+	#	pass
+
 	def __init__(self, numrt : int, deno : int = 1):
 		if not (isinstance(numrt, int) and isinstance(deno, int)): raise TypeError("The numerator and denominator must be int type.")
 		if numrt == 0 and deno == 0: raise NotANumber
@@ -23,14 +26,20 @@ class RatNum(object):
 
 		self._reduction()
 
+	def __repr__(self):
+		return str(self)
+
 	def __str__(self):
 		if self.numrt == 0: return "0"
 		if self.deno == 1: return str(self.numrt)
-		if self._DesimalPrint: return str(self.numrt / self.deno)
+		if self._DesimalPrint: return str(self.inDes())
 		return f"{self.numrt}/{self.deno}"
 
 	def __neg__(self):
 		self.numrt *= -1
+		return self
+
+	def __pos__(self):
 		return self
 
 	def __add__(self, other):
@@ -38,7 +47,7 @@ class RatNum(object):
 			return RatNum(self.numrt * other.deno + other.numrt * self.deno, self.deno * other.deno)
 		if isinstance(other, int):
 			return self + RatNum(other)
-		raise TypeError
+		raise TypeError("The addition, substraction, multiplication, division can be only with RatNum class or int numbers.")
 
 	def __iadd__(self, other):
 		result = self + other
@@ -48,7 +57,7 @@ class RatNum(object):
 	def __radd__(self, other):
 		if isinstance(other, int):
 			return self + RatNum(other)
-		raise TypeError
+		raise TypeError("The addition, substraction, multiplication, division can be only with RatNum class or int numbers.")
 
 	def __sub__(self, other):
 		return self + (-other)
@@ -60,14 +69,14 @@ class RatNum(object):
 	def __rsub__(self, other):
 		if isinstance(other, int):
 			return RatNum(other) - self
-		raise TypeError
+		raise TypeError("The addition, substraction, multiplication, division can be only with RatNum class or int numbers.")
 
 	def __mul__(self, other):
 		if isinstance(other, self.__class__):
 			return RatNum(self.numrt * other.numrt, self.deno * other.deno)
 		if isinstance(other, int):
 			return self * RatNum(other)
-		raise TypeError
+		raise TypeError("The addition, substraction, multiplication, division can be only with RatNum class or int numbers.")
 
 	def __imul__(self, other):
 		result = self * other
@@ -77,10 +86,14 @@ class RatNum(object):
 	def __rmul__(self, other):
 		if isinstance(other, int):
 			return self * RatNum(other)
-		raise TypeError
+		raise TypeError("The addition, substraction, multiplication, division can be only with RatNum class or int numbers.")
 
 	def __truediv__(self, other):
-		return self * RatNum(other.deno, other.numrt)
+		if isinstance(other, self.__class__):
+			return self * RatNum(other.deno, other.numrt)
+		if isinstance(other, int):
+			return self * RatNum(1, other)
+		raise TypeError("The addition, substraction, multiplication, division can be only with RatNum class or int numbers.")
 
 	def __itruediv__(self, other):
 		result = self / other
@@ -90,29 +103,84 @@ class RatNum(object):
 	def __rtruediv__(self, other):
 		if isinstance(other, int):
 			return RatNum(other) / self
-		raise TypeError
+		raise TypeError("The addition, substraction, multiplication, division can be only with RatNum class or int numbers.")
+
+	def __pow__(self, other):
+		if isinstance(other, int):
+			return RatNum(self.numrt ** other, self.deno ** other)
+		raise TypeError("The exponentation can be only with int numbers.")
+
+	def __ipow__(self, other):
+		result = self ** other
+		self.numrt, self.deno = result.numrt, result.deno
+		return self
+
+	def __rpow__(self, other):
+		if isinstance(other, (int, float)):
+			return other ** self.inDes()
+		raise TypeError("The exponentation can be only with int and float numbers.")
+
+	def __abs__(self):
+		self.numrt = abs(self.numrt)
+		return self
+
+	def __invert__(self):
+		self.numrt, self.deno = self.deno, self.numrt
+		return self
+
+	def __int__(self):
+		return int(self.inDes())
+
+	def __float__(self):
+		return self.inDes()
+
+	def __round__(self):
+		return round(self.inDes())
+
+	def __lt__(self, other):
+		if isinstance(other, self.__class__):
+			return self.inDes() < other.inDes()
+		if isinstance(other, int):
+			return self < RatNum(other)
+		raise TypeError("The comparison can be only with RatNum class or int numbers.")
+
+	def __eq__(self, other):
+		if isinstance(other, self.__class__):
+			return (self.numrt == other.numrt and self.deno == other.deno) or (self.numrt == 0 and other.numrt == 0)
+		if isinstance(other, int):
+			return self == RatNum(other)
+		raise TypeError("The comparison can be only with RatNum class or int numbers.")
+
+	def __le__(self, other):
+		return (self < other or self == other)
+
+	def __ne__(self, other):
+		return not (self == other)
+
+	def __gt__(self, other):
+		if isinstance(other, self.__class__):
+			return self.inDes() > other.inDes()
+		if isinstance(other, int):
+			return self > RatNum(other)
+		raise TypeError("The comparison can be only with RatNum class or int numbers.")
+
+	def __ge__(self, other):
+		return (self > other or self == other)
+
+	def inDes(self):
+		return self.numrt / self.deno
 
 	def setDesimalPrint(self, arg):
-		if not isinstance(arg, bool): raise ValueError("The argument must be bool type.")
+		if not isinstance(arg, bool): raise TypeError("The argument must be bool type.")
 		self._DesimalPrint = arg
 
 	def _reduction(self):
 		if self.numrt == 0: return
-		min_num = abs(min(self.numrt, self.deno))
-		for i in range(2, int(min_num**0.5 + 1) + 1):
-			while self.numrt % i == 0 and self.deno % i == 0:
-				self.numrt //= i
-				self.deno //= i
-			if min_num < i: break
-		if self.numrt % min_num == 0 and self.deno % min_num == 0: 
-			self.numrt //= min_num
-			self.deno //= min_num
 
-RatNum.setDesimalPrint(RatNum, False)
-
-X = RatNum(5, 16)
-Y = RatNum(0, 3)
-Z = RatNum(1, -6)
-X /= Z
-print(X)
-		
+		gcd_numrt = abs(self.numrt)
+		gcd_deno = self.deno
+		while gcd_numrt > 0 and gcd_deno > 0:
+			if gcd_deno > gcd_numrt: gcd_deno %= gcd_numrt
+			else: gcd_numrt %= gcd_deno
+		self.numrt //= max(gcd_numrt, gcd_deno)
+		self.deno //= max(gcd_numrt, gcd_deno)
