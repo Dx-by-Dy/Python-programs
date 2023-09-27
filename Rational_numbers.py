@@ -9,10 +9,12 @@ class RatNum(object):
 	deno : int
 	_DesimalPrint = False
 
-	#def __call__(self, numrt : int, deno : int = 1):
-	#	pass
-
-	def __init__(self, numrt : int, deno : int = 1):
+	def __init__(self, numrt : int = None, deno : int = 1, str_num : str = None):
+		if str_num != None: 
+			str_num = str_num.split("/")
+			if len(str_num) > 2 or len(str_num) == 0: raise ValueError("Invalid input number.")
+			if len(str_num) == 2: numrt, deno = tuple(map(int, str_num))
+			else: numrt = int(str_num[0])
 		if not (isinstance(numrt, int) and isinstance(deno, int)): raise TypeError("The numerator and denominator must be int type.")
 		if numrt == 0 and deno == 0: raise NotANumber
 		if deno == 0: raise ZeroDivisionError("The denominator must be non-zero int number.")

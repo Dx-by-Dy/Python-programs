@@ -45,8 +45,9 @@ def input_matrix():
 	size = int(input("Укажите количество строк матрицы: "))
 	print("Вводите строки: ")
 	lists = []
+	rn_lambda = lambda x: rn(str_num = x)
 	for i in range(size):
-		lists += [list(map(rn, map(int, input(f"{i+1} строка: ").split(" "))))]
+		lists += [list(map(rn_lambda, input(f"{i+1} строка: ").split(" ")))]
 	index_basic_clm = list(map(int, input("Введите номера базисных переменных: ").split(" ")))
 	index_artif_clm = list(map(int, input("Введите номера искусственных переменных: ").split(" ")))
 	print()
