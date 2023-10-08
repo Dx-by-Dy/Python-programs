@@ -1,0 +1,321 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[english, russian]{babel}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm,bindingoffset=0mm]{geometry}
+\usepackage{titlesec}
+\usepackage{amsmath}
+\usepackage{setspace}
+\usepackage[pdftex]{graphicx}
+\usepackage{dsfont}
+\usepackage[unicode, pdftex]{hyperref}
+
+\graphicspath{{C:/Users/user/Desktop/Kalman_foto}}
+\newtheorem{theorem}{$\quad$ Теорема}
+\setlength{\parindent}{5mm}
+\titleformat{\section}{\filcenter\normalfont\huge\bfseries}{\thesection.}{0.2em}{}
+\titleformat{\subsection}{\filcenter\normalfont\Large\bfseries}{\thesubsection.}{0.5em}{}
+\linespread{1.4}
+
+
+\begin{document}
+
+\vspace*{2cm}
+\section*{Фильтр Калмана и расширенный фильтр Калмана}
+\vspace*{1cm}
+
+\begin{center}
+САНКТ-ПЕТЕРБУРГСКИЙ ГОСУДАРСТВЕННЫЙ УНИВЕРСИТЕТ\\
+Кафедра технологий программирования
+\end{center}
+
+\vspace*{8cm}
+ 
+\begin{flushright}
+Исполнитель:\\
+студент 3 курса \\
+факультета ПМ-ПУ \\
+группы 21.Б02-пу \\
+\textit{Смирнов Алексей Артёмович}\\
+\vspace*{1cm}
+сентябрь 2023
+\end{flushright}
+
+\newpage
+
+\subsection*{Основные формулы}
+
+\quad \textbf{1.} Математическое ожидание (среднее значение) случайной величины $X \in \mathds{R}^n$, при непрерывном распределении определяется как \[\mathds{E}[X] = \int\limits_{-\infty}^{+\infty} Xf(X) \; dX, \]
+где $f(X)$ - плотность вероятности.
+
+\textbf{2.} Ковариация двух случайных величин $X, \:Y \in \mathds{R}^n$ на некотором вероятностном пространстве есть 
+\[cov(X, Y) =  \mathds{E}[(X - \mathds{E}[X])^T (Y - \mathds{E}[Y])].\]
+Ковариация дает численную характеристику того, насколько одна величина зависит от другой. В случае если величины являются независимыми, то их ковариация равна 0.
+
+\textbf{3.} Матрица ковариации вектора $X \in \mathds{R}^n$ есть
+\[\Sigma = \mathds{E}[(X - \mathds{E}[X])(X - \mathds{E}[X])^T] = \{\sigma_{ij}\}\] 
+\[\sigma_{ij} = cov(X_i, X_j) = \mathds{E}[(X_i - \mathds{E}[X_i]) (X_j - \mathds{E}[X_j])] \quad i, j = \overline{1, n}.\]
+В случае если координаты вектора $X$ попарно независимы, матрица ковариации есть диагональная матрица, на диагонали которой находятся дисперсии соответвующих координат. Дисперсия есть численная характеристика разброса случайной величины относительно ее среднего значения.
+
+\textbf{3.} Нормальное (гауссовское) распределение вектора $X \in \mathds{R}^n$ имеет плотность вероятности \[f(X) = \frac{1}{(2\pi)^{n/2} \vert \Sigma \vert^{1/2}} \; exp\left(-\frac{1}{2}(X-\mu)^T \: \Sigma^{-1} \:(X-\mu)\right),\]
+где $\Sigma$ - матрица ковариации вектора $X$, $\mu$ - вектор средних значений. Если $X$ имеет нормальное распределение, то каждая координата $X_i$ также имеет нормальное распределение по соответвующей оси.
+В одномерном случае
+\[f(x) = \frac{1}{\sigma \sqrt{2\pi}} \; exp\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)\]
+
+\newpage
+\subsection*{Фильтр Калмана}
+\paragraph*{1.Пример одномерного случая.}
+
+\quad \\ Допустим, у вас есть некоторая дискретная линейная математическая модель одномерного движения объекта вида:
+
+\begin{equation}
+x_{k+1} = x_{k} + u_{k},
+\end{equation}
+
+где $x_{k}$ - координата на прошлом шаге, $u_{k}$ - управление, контролирующее эволюцию системы на $k$-том шаге.
+
+Так как это лишь модель, то в действительности существуют неучтенные случайные факторы влияющие на нашу систему
+
+\begin{equation}
+x_{k+1} = x_{k} + u_{k} + \epsilon_{k}.
+\end{equation}
+
+С помощью некоторого датчика на каждом шаге замеряем координату объекта с некторой погрешность
+
+\begin{equation}
+z_{k+1} = x_{k} + \eta_{k}.
+\end{equation}
+
+
+Про величины $\epsilon_{k}, \eta_{k}$ известно следующее: данные величины имеют нормальное распределение для каждого шага $k$, среднее значение $E(\epsilon_{k}) = 0, E(\eta_{k}) = 0$ для каждого $k$, известны дисперсии данных величин $\sigma_{\epsilon}^2, \sigma_{\eta}^2$.\\
+
+Данный метод состоит из двух фаз: \textbf{Предсказания} и \textbf{Корректировки}.
+
+Предположим, что на $k-1$ шаге мы рассчитали некоторое расположение $x_{k-1}$ с дисперсией $\sigma_{k-1}^2$, после чего на основе нашей модели $(2)$ сделали предсказание координаты $\widehat{x}_k$ с дисперсией $\widehat{\sigma}_k^2 = \sigma_{k-1}^2 + \sigma_{\epsilon}^2$.
+Также от датчика получем значение $z_{k+1}$ c дисперсией $\sigma_z^2 = \sigma_{\eta}^2$.
+После чего на основе полученных данных делаем корректировку результата в виде:
+
+\begin{equation}
+\begin{cases}
+\widehat{x}_{k} = x_{k-1} + u_{k-1}, \\
+x_{k} = \widehat{x}_{k} + K_{k}(z_{k+1} - \widehat{x}_{k}).
+\end{cases}
+\end{equation}
+
+\begin{figure}[htbp]
+\center{\includegraphics[width=1\textwidth]{figure_1.png}}
+\label{ris:figure_1.png}
+\end{figure}
+
+Коэффициент $K$ называют \textbf{ядром Калмана}, именно за счет его значения можно уточнить значение и уменьшить погрешность. В данном случае 
+
+\begin{equation}
+\begin{cases}
+K_k = \widehat{\sigma}_k^2(\widehat{\sigma}_k^2 + \sigma_z^2)^{-1}, \\
+\sigma_k^2 = (1-K_k)\widehat{\sigma}_k^2.
+\end{cases}
+\end{equation}
+
+С обывательской точки зрения, коэффициент $K$ показывает насколько мы $"\text{доверяем}"$ значениям модели и датчика. Если $K \approx 1$ это означает, что мы намного больше доверяем показателям датчика, чем рассчетным показаниям модели, и берем значение ближе к значению датчика. Если же $K \approx 0$, то наоборот, мы намного больше доверяем модели и, соответвенно, берем значение ближе к значению предсказанному моделью.
+
+Также стоит отметить, что в пределе $\; \lim\limits_{k \to \infty} K_{k} = K_{stab} \;$, при условии, что дисперсии шумов не меняются во времени, в связи с чем, можно упростить итерационный алгоритм тем, что после некоторого шага считать $K_{k} = K_{k-1}$.
+
+\paragraph*{2.Общий случай в многомерном пространстве.}
+
+\quad \\ Пусть имеется линейная модель и система измерений вида:
+
+\begin{equation}
+\begin{cases}
+x_{k+1} = A_{k}x_{k} + B_{k}u_{k} + \epsilon_{k}, \\
+z_{k+1} = C_{k}x_{k} + \eta_{k},
+\end{cases}
+\end{equation}
+
+где $A_k - $ матрица системы $(n \times n)$, описывающая эволюцию системы без управления и шумов на $k$-том шаге, $B_k - $ матрица управленяи $(n \times l)$, описывающее действие управления на $k$-том шаге, $C_k - $ матрица отображения состояния $(m \times n)$ на $k$-том шаге, $\epsilon_{k}, \eta_{k} - $ случайные переменные описывающие шум на $k$-том шаге, считаются независимыми величинами, распределенными по нормальному закону с нулевым медианным значением и известной матрицей ковариации $R_k(n \times n)$ и $Q_k(m \times m)$ соответвенно.
+
+\newpage
+\begin{theorem}
+Если начальное представление системы $(6)$ имеет вид нормального распределения, то оно, в силу линейности, будет нормальным на всех последующих шагах.
+\end{theorem}
+
+\begin{theorem}
+Для минимизации среднеквадратичного отклонения $\sqrt{\vert \Sigma_{k} \vert}$ величины $x_{k}$ в системе $(6)$ достаточно считать $x_k$ по следующим формулам:
+
+\begin{equation}
+\begin{cases}
+\widehat{x}_{k} = A_{k}x_{k-1} + B_{k}u_{k-1}, \\
+\widehat{\Sigma}_k = A_k\Sigma_{k-1}A_k^T + R_k.
+\end{cases}
+\end{equation}
+
+\begin{equation}
+\begin{cases}
+K_k = \widehat{\Sigma}_k C_k^T \:(C_k \widehat{\Sigma}_k C_k^T + Q_k)^{-1}, \\
+x_k = \widehat{x}_{k} + K_k(z_{k+1} - C_k \widehat{x}_{k}), \\
+\Sigma_k = (I - K_k C_k)\widehat{\Sigma}_k.
+\end{cases}
+\end{equation}
+
+\end{theorem}
+\textbf{Условия применения фильтра Калмана:}
+\begin{itemize}
+\item Модель и система изменений должны быть линейны. \\
+
+\begin{figure}[htbp]
+\center{\includegraphics[width=1\textwidth]{foto2.jpg}}
+\label{ris:foto2.jpg}
+\end{figure}
+
+\item Случайные величины являются независимыми, распределенные по нормальному закону с нулевым медианным значением.
+\end{itemize}
+\textbf{Сложность алгоритма фильтра Калмана:}
+
+\begin{itemize}
+\item Шаг предсказания $O(n^2)$.
+\item Шаг коррекции $O(n^2 + m^{2.4})$.
+\end{itemize}
+Где $n$ - размерность модели, $m$ - размерность системы измерений.
+
+\begin{flushleft}
+\textbf{Пример реализации:}
+\end{flushleft}
+
+Рассмотрим случай $x, z \in \mathds{R}^2$, в частности:
+
+\begin{equation}
+\begin{cases}
+x^{k+1}_1 = x^{k}_1 + x^{k}_2, \\
+x^{k+1}_2 = \quad \quad \;x^{k}_2 + \epsilon^{k}_2, \\
+z^{k+1}_1 = x^{k}_1 \quad + \quad \; \eta^{k}_1, \\
+z^{k+1}_2 =  \quad \quad \; x^{k}_2 + \eta^{k}_2,
+\end{cases}
+\end{equation}
+
+\begin{equation}
+A_{k} =
+\begin{pmatrix}
+1 & 1 \\
+0 & 1 \\
+\end{pmatrix}, \;
+B_k = 
+\begin{pmatrix}
+0 & 0 \\
+0 & 0 \\
+\end{pmatrix}, \;
+C_k = 
+\begin{pmatrix}
+1 & 0 \\
+0 & 1 \\
+\end{pmatrix}, \;
+R_k = 
+\begin{pmatrix}
+0 & 0 \\
+0 & \sigma_{\epsilon 2}^2 \\
+\end{pmatrix}, \;
+Q_k = 
+\begin{pmatrix}
+\sigma_{\eta 1}^2 & 0 \\
+0 & \sigma_{\eta 2}^2 \\
+\end{pmatrix}
+\end{equation}
+
+
+
+\newpage
+\subsection*{Расширенный фильтр Калмана}
+
+В реальном мире большинство процессов описывается нелинейными функциями, для которых классический фильтр Калмана неприменим. Рассмотрим одно из решений данной проблемы - \textbf{локальная линеаризация}.
+
+Пусть имеется нелинейная модель и нелинейная система измерений
+
+\begin{equation}
+\begin{cases}
+x_{k+1} = g(x_k, u_k) + \epsilon_k, \\
+z_{k+1} = h(x_k) + \eta_k,
+\end{cases}
+\end{equation} 
+где $g(\cdot), h(\cdot)$ - нелинейные функции. Линеаризуем эти функции до первого члена ряда Тейлора
+
+\begin{equation}
+\begin{cases}
+g(x_k, u_k) \approx g(\widehat{x}_k, u_k) + G_k \big|_{\widehat{x}_k} (x_k - \widehat{x}_k)\\
+h(x_k) \approx h(\widehat{x}_k) + H_k \big|_{\widehat{x}_k}(x_k - \widehat{x}_k),
+\end{cases}
+\end{equation} 
+где $G_k, H_k$ - матрицы Якоби для $g(\cdot), h(\cdot)$ соответвенно.
+
+После данной процедуры линеаризованная модель движения будет иметь плотность вероятности вида:
+
+\begin{equation}
+f_k(x_{k+1}) = \frac{1}{(2\pi)^{n/2} \vert R_k \vert^{1/2}} \cdot
+\end{equation} 
+\[exp\left(-\frac{1}{2}(x_{k+1} -g(\widehat{x}_k, u_k) - G_k \big|_{\widehat{x}_k} (x_k - \widehat{x}_k))^T \: R_k^{-1} \:(x_{k+1} -g(\widehat{x}_k, u_k) - G_k \big|_{\widehat{x}_k} (x_k - \widehat{x}_k))\right), \]
+и формулы фильтра Калмана будут иметь вид:
+
+\begin{equation}
+\begin{cases}
+\widehat{x}_{k} = g(x_{k-1}, u_{k-1}), \\
+\widehat{\Sigma}_k = G_k\big|_{\widehat{x}_k}\Sigma_{k-1}G_k^T\big|_{\widehat{x}_k} + R_k.
+\end{cases}
+\end{equation}
+
+\begin{equation}
+\begin{cases}
+K_k = \widehat{\Sigma}_k H_k^T\big|_{\widehat{x}_k} \:(H_k\big|_{\widehat{x}_k} \widehat{\Sigma}_k H_k^T\big|_{\widehat{x}_k} + Q_k)^{-1}, \\
+x_k = \widehat{x}_{k} + K_k(z_{k+1} - h( \widehat{x}_{k})), \\
+\Sigma_k = (I - K_k H_k\big|_{\widehat{x}_k})\widehat{\Sigma}_k.
+\end{cases}
+\end{equation}
+
+Расширенный фильтр Калмана хорошо работает для небольших нелинейностей, при сильной нелинейности наибольший вклад в ошибку аппроксимации будет вносить не шум модели или системы измерений, а ошибка связанная с линеаризацией функций, что даже может привести к расхождению фильтра.
+
+\begin{figure}[htp]
+\center{\includegraphics[width=1\textwidth]{foto3.jpg}}
+\label{ris:foto3.png}
+\end{figure}
+
+\newpage
+\begin{flushleft}
+\textbf{Другие разновидности фильтров Калмана:}
+\end{flushleft}
+
+\textbf{Фильтр Калмана "без запаха"} - другой метод построения линейного приближения по точкам с весами.
+
+\textbf{Непрерывный фильтр Калмана} - для работы с непрерывной моделью и системой измерений.
+
+\textbf{Смешанный фильтр Калмана} - для одновременной работы с непрерывной и дискретной моделью и системой предсказаний.
+
+\begin{flushleft}
+\textbf{Область применения фильтров Калмана:}
+\end{flushleft}
+
+\begin{itemize}
+\item Оценка параметров динамических систем по зашумленным измерениям.
+\item Сглаживание сигналов измерений.
+\item Прогнозирование будущих изменений сигнала.
+\item Системы навигации и управления.
+\item Экономическое моделирование.
+\end{itemize}
+
+\begin{flushleft}
+\textbf{Полезные ссылки:}
+\end{flushleft}
+
+\begin{itemize}
+\item \url{https://www.unitedthc.com/DSP/Kalman1960.pdf} - оригинальная статья Калмана 1960г.
+\item Буре В. М., Парилина Е. М. - Теория вероятностей и математическая статистика
+\item \url{https://www.youtube.com/watch?v=QOW_qxgcdds} - объясняющее видео.
+\item \url{https://habr.com/ru/articles/166693/} - статья на хабре с одномерным примером.
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
