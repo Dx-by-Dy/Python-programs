@@ -8,6 +8,7 @@
 \usepackage{setspace}
 \usepackage[pdftex]{graphicx}
 \usepackage{dsfont}
+\usepackage{comment}
 \usepackage[unicode, pdftex]{hyperref}
 
 \graphicspath{{C:/Users/user/Desktop/Kalman_foto}}
@@ -159,7 +160,7 @@ x_k = \widehat{x}_{k} + K_k(z_{k+1} - C_k \widehat{x}_{k}), \\
 \end{theorem}
 \textbf{Условия применения фильтра Калмана:}
 \begin{itemize}
-\item Модель и система изменений должны быть линейны. \\
+\item Модель и система измерений должны быть линейны. \\
 
 \begin{figure}[htbp]
 \center{\includegraphics[width=1\textwidth]{foto2.jpg}}
@@ -176,6 +177,7 @@ x_k = \widehat{x}_{k} + K_k(z_{k+1} - C_k \widehat{x}_{k}), \\
 \end{itemize}
 Где $n$ - размерность модели, $m$ - размерность системы измерений.
 
+\begin{comment}
 \begin{flushleft}
 \textbf{Пример реализации:}
 \end{flushleft}
@@ -194,8 +196,8 @@ z^{k+1}_2 =  \quad \quad \; x^{k}_2 + \eta^{k}_2,
 \begin{equation}
 A_{k} =
 \begin{pmatrix}
-1 & 1 \\
-0 & 1 \\
+1 & 0.5 \\
+0 & 0.9 \\
 \end{pmatrix}, \;
 B_k = 
 \begin{pmatrix}
@@ -216,12 +218,29 @@ Q_k =
 \begin{pmatrix}
 \sigma_{\eta 1}^2 & 0 \\
 0 & \sigma_{\eta 2}^2 \\
-\end{pmatrix}
+\end{pmatrix}.
 \end{equation}
 
-
+Начальные данные будем считать таковыми:
+\begin{equation}
+P_{0} =
+\begin{pmatrix}
+0 & 0 \\
+0 & 0 \\
+\end{pmatrix}, \;
+x^0 = \begin{pmatrix}
+0 \\
+1.1 \\
+\end{pmatrix}, \;
+x^0_{true} = \begin{pmatrix}
+0 \\
+1.1 \\
+\end{pmatrix}.
+\end{equation}
 
 \newpage
+\end{comment}
+
 \subsection*{Расширенный фильтр Калмана}
 
 В реальном мире большинство процессов описывается нелинейными функциями, для которых классический фильтр Калмана неприменим. Рассмотрим одно из решений данной проблемы - \textbf{локальная линеаризация}.
@@ -303,9 +322,10 @@ x_k = \widehat{x}_{k} + K_k(z_{k+1} - h( \widehat{x}_{k})), \\
 
 \begin{itemize}
 \item \url{https://www.unitedthc.com/DSP/Kalman1960.pdf} - оригинальная статья Калмана 1960г.
-\item Буре В. М., Парилина Е. М. - Теория вероятностей и математическая статистика
+\item Буре В. М., Парилина Е. М. - Теория вероятностей и математическая статистика.
 \item \url{https://www.youtube.com/watch?v=QOW_qxgcdds} - объясняющее видео.
 \item \url{https://habr.com/ru/articles/166693/} - статья на хабре с одномерным примером.
+\item \url{https://github.com/Dx-by-Dy/Python-programs/blob/main/Numerical_metods/Kalman_filters.py} - реализация на Python.
 \end{itemize}
 
 
