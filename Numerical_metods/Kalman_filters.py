@@ -1,4 +1,5 @@
-import numpy as np
+from numpy import matmul, transpose, eye
+from numpy.linalg import inv
 
 def Kalman_filter(X, U, Z, P, A, B, C, R, Q):
 	"""
@@ -15,12 +16,12 @@ def Kalman_filter(X, U, Z, P, A, B, C, R, Q):
 
 	dim = P.shape[0]
 
-	X1 = np.matmul(A, X) + np.matmul(B, U)
-	P1 = np.matmul(np.matmul(A, P), np.transpose(A)) + R
+	X1 = matmul(A, X) + matmul(B, U)
+	P1 = matmul(matmul(A, P), transpose(A)) + R
 
-	K = np.matmul(np.matmul(P1, np.transpose(C)), np.linalg.inv(np.matmul(np.matmul(C, P), np.transpose(C)) + Q))
-	X = X1 + np.matmul(K, Z - X1)
-	P = np.matmul(np.eye(dim, dim) - np.matmul(K, C), P1)
+	K = matmul(matmul(P1, transpose(C)), inv(matmul(matmul(C, P1), transpose(C)) + Q))
+	X = X1 + matmul(K, Z - X1)
+	P = matmul(eye(dim, dim) - matmul(K, C), P1)
 
 	return X, P
 
@@ -45,10 +46,10 @@ def Extended_Kalman_filter(X, U, Z, P, R, Q, g, h, grad_g, grad_h):
 	G = grad_g(X1)
 	H = grad_h(X1)
 
-	P1 = np.matmul(np.matmul(G, P), np.transpose(G)) + R
+	P1 = matmul(matmul(G, P), transpose(G)) + R
 
-	K = np.matmul(np.matmul(P1, np.transpose(H)), np.linalg.inv(np.matmul(np.matmul(H, P), np.transpose(H)) + Q))
-	X = X1 + np.matmul(K, Z - h(X1))
-	P = np.matmul(np.eye(dim, dim) - np.matmul(K, H), P1)
+	K = matmul(matmul(P1, transpose(H)), inv(matmul(matmul(H, P1), transpose(H)) + Q))
+	X = X1 + matmul(K, Z - h(X1))
+	P = matmul(eye(dim, dim) - matmul(K, H), P1)
 
 	return X, P
