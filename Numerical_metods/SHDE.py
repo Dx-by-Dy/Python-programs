@@ -52,7 +52,7 @@ def func_ND(arg_x : mpf, list_y : tuple[mpf], row : int) -> mpf:
 		return -glB * list_y[0]
 
 
-@lru_cache
+#@lru_cache
 def get_adjus_coef_ND(arg_x : mpf, list_y : tuple[mpf], arg_h : mpf, list_a : tuple[mpf], list_c : tuple[mpf], row : int, num : int) -> mpf:
 	# рассчет поправок
 	if num == 1: return arg_h * func_ND(arg_x, list_y, row)
@@ -329,46 +329,52 @@ def grafics(index : int) -> None:
 
 	if index == 3:
 
-		ax = [i for i in range(1, 9)]
+		ax = [i for i in range(5, 13)]
 		c_call_func2, c_call_func3, c_call_func4, c_call_func_c2, c_call_func_c3, c_call_func_c4 = [], [], [], [], [], []
 		c_call_func = 0
 
-		for i in range(1, 9):
+		for i in range(5, 13):
 			ode_var_step(start_x, start_y, pi, tuple_a_2, tuple_b_2, tuple_c_2, 10**(-i))
 			c_call_func2 += [c_call_func]
 			c_call_func = 0
 
+			'''
 			ode_const_step(start_x, start_y, pi, tuple_a_2, tuple_b_2, tuple_c_2, 10**(-i))
 			c_call_func_c2 += [c_call_func]
 			c_call_func = 0
+			'''
 
 			ode_var_step(start_x, start_y, pi, tuple_a_3_1, tuple_b_3_1, tuple_c_3_1, 10**(-i))
 			c_call_func3 += [c_call_func]
 			c_call_func = 0
 
+			'''
 			ode_const_step(start_x, start_y, pi, tuple_a_3_1, tuple_b_3_1, tuple_c_3_1, 10**(-i))
 			c_call_func_c3 += [c_call_func]
 			c_call_func = 0
+			'''
 
 			ode_var_step(start_x, start_y, pi, tuple_a_4_1, tuple_b_4_1, tuple_c_4_1, 10**(-i))
 			c_call_func4 += [c_call_func]
 			c_call_func = 0
 
+			'''
 			ode_const_step(start_x, start_y, pi, tuple_a_4_1, tuple_b_4_1, tuple_c_4_1, 10**(-i))
 			c_call_func_c4 += [c_call_func]
 			c_call_func = 0
+			'''
 
 
 		axis.plot(ax, c_call_func2, "r", label = "Двухэтапный метод (автоматический шаг)")
-		axis.plot(ax, c_call_func_c2, "r--", label = "Двухэтапный метод (постоянный шаг)")
+		#axis.plot(ax, c_call_func_c2, "r--", label = "Двухэтапный метод (постоянный шаг)")
 		axis.plot(ax, c_call_func3, "b", label = "Трехэтапный метод (автоматический шаг)")
-		axis.plot(ax, c_call_func_c3, "b--", label = "Трехэтапный метод (постоянный шаг)")
+		#axis.plot(ax, c_call_func_c3, "b--", label = "Трехэтапный метод (постоянный шаг)")
 		axis.plot(ax, c_call_func4, "g", label = "Четырехэтапный метод (автоматический шаг)")
-		axis.plot(ax, c_call_func_c4, "g--", label = "Четырехэтапный метод (постоянный шаг)")
+		#axis.plot(ax, c_call_func_c4, "g--", label = "Четырехэтапный метод (постоянный шаг)")
 		axis.set_title("Зависимость количества вызовов функции \n" + \
-			"для двухэтапного, трехэтапного и четырехэтапного метода с постоянным и автоматическим шагом от значения $ \\epsilon $")
+			"для двухэтапного, трехэтапного и четырехэтапного метода с автоматическим шагом от значения $ \\epsilon $")
 		axis.set_xlabel("Значение $ \\epsilon $")
-		axis.set_ylim(0, 2000)
+		axis.set_ylim(0, 5000)
 		axis.set_xticks(ax, ["$10^{" + str(-i) + "}$" for i in ax])
 		axis.grid()
 		axis.legend()
