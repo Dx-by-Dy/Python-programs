@@ -1,0 +1,101 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[english, russian]{babel}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[left=1.5cm,right=1.5cm,top=2cm,bottom=2cm,bindingoffset=0mm]{geometry}
+\usepackage{titlesec}
+\usepackage{amsmath}
+\usepackage{setspace}
+\usepackage{dsfont}
+\usepackage{comment}
+
+\setlength{\parindent}{0mm}
+\linespread{1.4}
+
+\begin{document}
+
+\quad Рассмотрим неоднородную систему обыкновенных дифференциальных уравнений вида:
+\[
+\dot{x}(t) = A x(t) + \gamma(t), \eqno(1)
+\]
+где $x(t), \gamma(t) \in \mathds{R}^n$ - вектор-функции, $A$ - стационарная матрица размерности $n \times n$. Решение системы $(1)$ можно выписать в явном виде через формулу Коши
+
+\[
+x(t) = Y(t)\left(x(0) + \int_0^t Y^{-1}(s) \gamma(s) ds\right),
+\]
+где $Y(t)$ - фундаментальная матрица системы $(1)$, которую можно представить в виде:
+
+\[
+Y(t) = e^{At}.
+\]
+
+\quad Представим матрицу $A$ как $A = SDS^{-1}$, где $S$ - ортонормированная матрица, $D$ - матрица, состоящая из клеток Жордана $J_{\lambda_{i}}$. Н.У.О. рассмотрим случай, когда $D = J_{\lambda_{i}}$ размерности $n_i \times n_i$ (считаем размерность системы $n_i$), тогда $Y(t)$ представима в виде:
+\[
+Y(t) = S \left(
+\begin{array}{ccccc}
+e^{\lambda_{i}t} & te^{\lambda_{i}t} & \dots & \frac{t^{n_i - 2}}{(n_i - 2)!} e^{\lambda_{i}t} & \frac{t^{n_i - 1}}{(n_i - 1)!} e^{\lambda_{i}t} \\
+0 & e^{\lambda_{i}t} & \dots & \frac{t^{n_i - 3}}{(n_i - 3)!} e^{\lambda_{i}t} & \frac{t^{n_i - 2}}{(n_i - 2)!} e^{\lambda_{i}t} \\
+\vdots & \vdots & \ddots & \vdots & \vdots\\
+0 & 0 & \dots & e^{\lambda_{i}t} & te^{\lambda_{i}t} \\
+0 & 0 & \dots & 0 & e^{\lambda_{i}t} \\
+\end{array}
+\right) S^{-1},
+\]
+следовательно, $Y(t)Y^{-1}(s)$ представима в виде:
+
+\[
+Y(t)Y^{-1}(s) = e^{At}e^{-As} = e^{A(t-s)} = 
+\] 
+\[ =S \left(
+\begin{array}{ccccc}
+e^{\lambda_{i}(t-s)} & (t-s)e^{\lambda_{i}(t-s)} & \dots & \frac{(t-s)^{n_i - 2}}{(n_i - 2)!} e^{\lambda_{i}(t-s)} & \frac{(t-s)^{n_i - 1}}{(n_i - 1)!} e^{\lambda_{i}(t-s)} \\
+0 & e^{\lambda_{i}(t-s)} & \dots & \frac{(t-s)^{n_i - 3}}{(n_i - 3)!} e^{\lambda_{i}(t-s)} & \frac{(t-s)^{n_i - 2}}{(n_i - 2)!} e^{\lambda_{i}(t-s)} \\
+\vdots & \vdots & \ddots & \vdots & \vdots\\
+0 & 0 & \dots & e^{\lambda_{i}(t-s)} & (t-s)e^{\lambda_{i}(t-s)} \\
+0 & 0 & \dots & 0 & e^{\lambda_{i}(t-s)} \\
+\end{array}
+\right) S^{-1}.
+\]
+
+\newpage
+
+\quad Сделаем замену $J^{-1}\gamma(t) = \widetilde{\gamma}(t) = (\widetilde{\gamma}_0(t), \dots, \widetilde{\gamma}_{n_i - 1}(t))^T$. Получим представление для  $Y(t)Y^{-1}(s)\gamma(s)$:
+\[
+Y(t)Y^{-1}(s)\gamma(s) = S \left(
+\begin{array}{c}
+\displaystyle \sum_{k=0}^{n_i - 1}\frac{(t-s)^k}{k!}e^{\lambda_{i}(t-s)}\widetilde{\gamma}_k(s) \\
+\displaystyle \sum_{k=1}^{n_i - 1}\frac{(t-s)^k}{k!}e^{\lambda_{i}(t-s)}\widetilde{\gamma}_k(s) \\
+\vdots \\
+\displaystyle \sum_{k=n_i-2}^{n_i - 1}\frac{(t-s)^k}{k!}e^{\lambda_{i}(t-s)}\widetilde{\gamma}_k(s) \\
+\displaystyle \sum_{k=n_i-1}^{n_i - 1}\frac{(t-s)^k}{k!}e^{\lambda_{i}(t-s)}\widetilde{\gamma}_k(s)
+\end{array}
+\right).
+\]
+
+\quad По итогу, выражение $x(t)$ представляем как
+\[
+x(t) = Y(t)x(0) + S
+\left(
+\begin{array}{c}
+\displaystyle \sum_{k=0}^{n_i - 1}\int_0^t\frac{(t-s)^k}{k!}e^{\lambda_{i}(t-s)}\widetilde{\gamma}_k(s)ds \\
+\displaystyle \sum_{k=1}^{n_i - 1}\int_0^t\frac{(t-s)^k}{k!}e^{\lambda_{i}(t-s)}\widetilde{\gamma}_k(s)ds \\
+\vdots \\
+\displaystyle \sum_{k=n_i-2}^{n_i - 1}\int_0^t\frac{(t-s)^k}{k!}e^{\lambda_{i}(t-s)}\widetilde{\gamma}_k(s)ds \\
+\displaystyle \sum_{k=n_i-1}^{n_i - 1}\int_0^t\frac{(t-s)^k}{k!}e^{\lambda_{i}(t-s)}\widetilde{\gamma}_k(s)ds
+\end{array}
+\right)
+.
+\]
+
+Докажем вспомогательную лемму.
+
+\quad \textbf{Лемма 1.} \textit{Пусть функция $f(x) \in C([0, \infty))$ удовлетворяет условию $\displaystyle\lim_{t \rightarrow \infty}e^{\lambda t}f(t) = \pm \infty$, то $\displaystyle\lim_{t \rightarrow \infty}\int_0^t e^{\lambda s}(t-s)^k f(s)ds = \pm \infty \;\; \forall \: k \in \mathds{Z_+}$, если же $\displaystyle\lim_{t \rightarrow \infty}\int_0^t e^{\lambda s}(t-s)^k f(s)ds = 0$, то $\displaystyle\lim_{t \rightarrow \infty}e^{\lambda t}f(t) = 0$.}
+
+\begin{comment}
+\quad Пусть система $(1)$ асимптотически устойчива по Ляпунову, из чего следует, что $\forall \: \lambda_{i}, \; i=\overline{1, n}$ - собственного числа матрицы $A$, выполняется $Re(\lambda_{i}) < 0$.
+\end{comment} 
+
+
+
+
+\end{document}
