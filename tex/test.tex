@@ -5,6 +5,7 @@
 \usepackage[left=1.5cm,right=1.5cm,top=2cm,bottom=2cm,bindingoffset=0mm]{geometry}
 \usepackage{titlesec}
 \usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{setspace}
 \usepackage{dsfont}
 \usepackage{comment}
@@ -59,7 +60,7 @@ e^{\lambda_{i}(t-s)} & (t-s)e^{\lambda_{i}(t-s)} & \dots & \frac{(t-s)^{n_i - 2}
 
 \newpage
 
-\quad Сделаем замену $J^{-1}\gamma(t) = \widetilde{\gamma}(t) = (\widetilde{\gamma}_0(t), \dots, \widetilde{\gamma}_{n_i - 1}(t))^T$. Получим представление для  $Y(t)Y^{-1}(s)\gamma(s)$:
+\quad Сделаем замену $S^{-1}\gamma(t) = \widetilde{\gamma}(t) = (\widetilde{\gamma}_0(t), \dots, \widetilde{\gamma}_{n_i - 1}(t))^T$. Получим представление для  $Y(t)Y^{-1}(s)\gamma(s)$:
 \[
 Y(t)Y^{-1}(s)\gamma(s) = S \left(
 \begin{array}{c}
@@ -87,9 +88,40 @@ x(t) = Y(t)x(0) + S
 .
 \]
 
-Докажем вспомогательную лемму.
+Докажем вспомогательные утверждения.
 
-\quad \textbf{Лемма 1.} \textit{Пусть функция $f(x) \in C([0, \infty))$ удовлетворяет условию $\displaystyle\lim_{t \rightarrow \infty}e^{\lambda t}f(t) = \pm \infty$, то $\displaystyle\lim_{t \rightarrow \infty}\int_0^t e^{\lambda s}(t-s)^k f(s)ds = \pm \infty \;\; \forall \: k \in \mathds{Z_+}$, если же $\displaystyle\lim_{t \rightarrow \infty}\int_0^t e^{\lambda s}(t-s)^k f(s)ds = 0$, то $\displaystyle\lim_{t \rightarrow \infty}e^{\lambda t}f(t) = 0$.}
+\quad \textbf{Предложение 1.} \textit{Пусть функция $f(t) \in C^1([0, \infty)) : \displaystyle\lim_{t \rightarrow \infty}\dot{f}(t) = \pm \infty \Rightarrow \lim_{t \rightarrow \infty}f(t) = \pm \infty$.}
+
+\begin{center}
+\textbf{Доказательство}
+\end{center}
+
+\quad Для определенности рассмотрим случай $\displaystyle\lim_{t \rightarrow \infty}\dot{f}(t) = +\infty$, второй случай доказывается аналогично. Из определения предела следует, что $\exists t_0 : \forall \: \widetilde{t} > t_0 \Rightarrow \dot{f}(\widetilde{t}) > 1$, то есть \\ $\displaystyle\lim_{\Delta t \rightarrow 0}\frac{f(\widetilde{t} + \Delta t) - f(\widetilde{t})}{\Delta t} > 1 \Rightarrow \exists \Delta \widetilde{t}(\widetilde{t}) > 0 : \frac{f(\widetilde{t} + \Delta \widetilde{t}) - f(\widetilde{t})}{\Delta \widetilde{t}} > 1 \Rightarrow f(\widetilde{t} + \Delta \widetilde{t}) > f(\widetilde{t}) + \Delta \widetilde{t} \Rightarrow f(\widetilde{t} + n\Delta \widetilde{t}) > f(\widetilde{t}) + n\Delta \widetilde{t}, \;\; 	\forall \: n \in \mathds{N} \Rightarrow \lim_{t \rightarrow \infty}f(t) = \lim_{n \rightarrow \infty} f(\widetilde{t} + n\Delta \widetilde{t}) \geq f(\widetilde{t}) + \Delta\widetilde{t} \lim_{n \rightarrow \infty}n = +\infty \Rightarrow \lim_{t \rightarrow \infty}f(t) = +\infty$.
+\begin{flushright} $\square$ \end{flushright}
+
+\quad \textbf{Предложение 2.} \textit{Пусть функция $f(t) \in C^1([0, \infty)) : \displaystyle\lim_{t \rightarrow \infty}f(t) = 0. \\ \exists t_0 : \forall \: t > t_0 \;\; f(t)$ - монотонна $\Rightarrow \displaystyle\lim_{t \rightarrow \infty}\dot{f}(t) = 0.$}
+
+\begin{center}
+\textbf{Доказательство}
+\end{center}
+
+\quad Для определенности рассмотрим случай, когда $\exists t_0 : \forall \: t > t_0 \;\; f(t)$ - монотоннo убывает, то есть $\exists t_0 : \forall \: \widetilde{t} > t_0 \Rightarrow \dot{f}(\widetilde{t}) < 0$. Предположим, что $\displaystyle \exists \delta > 0 : \forall t_1>t_0 \;\; \exists \widetilde{t} > t_1 : \dot{f}(\widetilde{t}) < -\delta \Rightarrow \\ \forall \: n \in \mathds{N} \lim_{\Delta t \rightarrow 0}\frac{f(\widetilde{t} + n\Delta t) - f(\widetilde{t})}{n\Delta t} <-\delta \Rightarrow \exists\Delta \widetilde{t}(n, \widetilde{t}) > 0 : f(\widetilde{t} + n\Delta t) < f(\widetilde{t}) - n\delta\Delta\widetilde{t} \Rightarrow \\ \lim_{t \rightarrow \infty}f(t) = \lim_{n \rightarrow \infty} f(\widetilde{t} + n\Delta \widetilde{t}) < f(\widetilde{t}) - \lim_{n \rightarrow \infty}n\Delta \widetilde{t} = +\infty$
+
+
+\quad \textbf{Лемма 1.} \textit{Пусть функция $f(t) \in C([0, \infty))$ удовлетворяет условию $\displaystyle\lim_{t \rightarrow \infty}f(t) = \pm \infty$, то $\displaystyle\lim_{t \rightarrow \infty}\int_0^t(t-s)^k f(s)ds = \pm \infty \;\; \forall \: k \in \mathds{Z_+}$, если же $\displaystyle \exists k \in \mathds{Z_+}: \lim_{t \rightarrow \infty}\int_0^t(t-s)^k f(s)ds = 0$ и, начиная с некоторого момента, $f(s)$ сохраняет знак, то $\displaystyle\lim_{t \rightarrow \infty}f(t) = 0$.}
+
+\quad \textbf{Доказательство.}
+
+\quad Рассмотрим случай когда $\displaystyle\lim_{t \rightarrow \infty}f(t) = \pm \infty$. Воспользуемся следующим фактом: 
+\[\forall \: g(t) \in C^1([0, \infty)) : \displaystyle\lim_{t \rightarrow \infty}\dot{g}(t) = \pm \infty \Rightarrow \lim_{t \rightarrow \infty}g(t) = \pm \infty. \eqno(2)\] 
+Если в качестве $g(t)$ взять $\displaystyle\int_0^t f(s)ds$, то в силу $(2)$ получим, что $\displaystyle\lim_{t \rightarrow \infty}\int_0^tf(s)ds = \pm \infty$. Теперь возьмем в качестве $g(t) = \displaystyle\int_0^t (t-s)^kf(s)ds$, где $k \in \mathds{N}$ и предположим, что \\ $\displaystyle\lim_{t \rightarrow \infty}\int_0^t(t-s)^{k-1}f(s)ds = \pm \infty$, тогда из утверждения $(2)$ следует, что $\displaystyle\lim_{t \rightarrow \infty}\int_0^t(t-s)^kf(s)ds = \pm \infty$, тем самым мы доказали базу и шаг математической индукции.
+
+\quad Рассмотрим второй случай леммы. Докажем следующий факт:
+
+
+
+
+
 
 \begin{comment}
 \quad Пусть система $(1)$ асимптотически устойчива по Ляпунову, из чего следует, что $\forall \: \lambda_{i}, \; i=\overline{1, n}$ - собственного числа матрицы $A$, выполняется $Re(\lambda_{i}) < 0$.
