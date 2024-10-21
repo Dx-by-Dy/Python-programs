@@ -65,10 +65,10 @@ e^{\lambda_{i}(t-s)} & (t-s)e^{\lambda_{i}(t-s)} & \dots & \frac{(t-s)^{n_i - 2}
 Y(t)Y^{-1}(s)\gamma(s) = S \left(
 \begin{array}{c}
 \displaystyle \sum_{k=0}^{n_i - 1}\frac{(t-s)^k}{k!}e^{\lambda_{i}(t-s)}\widetilde{\gamma}_k(s) \\
-\displaystyle \sum_{k=1}^{n_i - 1}\frac{(t-s)^k}{k!}e^{\lambda_{i}(t-s)}\widetilde{\gamma}_k(s) \\
+\displaystyle \sum_{k=1}^{n_i - 1}\frac{(t-s)^{k-1}}{(k-1)!}e^{\lambda_{i}(t-s)}\widetilde{\gamma}_{k}(s) \\
 \vdots \\
-\displaystyle \sum_{k=n_i-2}^{n_i - 1}\frac{(t-s)^k}{k!}e^{\lambda_{i}(t-s)}\widetilde{\gamma}_k(s) \\
-\displaystyle \sum_{k=n_i-1}^{n_i - 1}\frac{(t-s)^k}{k!}e^{\lambda_{i}(t-s)}\widetilde{\gamma}_k(s)
+\displaystyle \sum_{k=n_i-2}^{n_i - 1}\frac{(t-s)^{k-(n_i-2)}}{(k-(n_i-2))!}e^{\lambda_{i}(t-s)}\widetilde{\gamma}_k(s) \\
+\displaystyle \sum_{k=n_i-1}^{n_i - 1}\frac{(t-s)^{k-(n_i-1)}}{(k-(n_i-1))!}e^{\lambda_{i}(t-s)}\widetilde{\gamma}_k(s)
 \end{array}
 \right).
 \]
@@ -79,13 +79,13 @@ x(t) = Y(t)x(0) + S
 \left(
 \begin{array}{c}
 \displaystyle \sum_{k=0}^{n_i - 1}\int_0^t\frac{(t-s)^k}{k!}e^{\lambda_{i}(t-s)}\widetilde{\gamma}_k(s)ds \\
-\displaystyle \sum_{k=1}^{n_i - 1}\int_0^t\frac{(t-s)^k}{k!}e^{\lambda_{i}(t-s)}\widetilde{\gamma}_k(s)ds \\
+\displaystyle \sum_{k=1}^{n_i - 1}\int_0^t\frac{(t-s)^{k-1}}{(k-1)!}e^{\lambda_{i}(t-s)}\widetilde{\gamma}_{k}(s)ds \\
 \vdots \\
-\displaystyle \sum_{k=n_i-2}^{n_i - 1}\int_0^t\frac{(t-s)^k}{k!}e^{\lambda_{i}(t-s)}\widetilde{\gamma}_k(s)ds \\
-\displaystyle \sum_{k=n_i-1}^{n_i - 1}\int_0^t\frac{(t-s)^k}{k!}e^{\lambda_{i}(t-s)}\widetilde{\gamma}_k(s)ds
+\displaystyle \sum_{k=n_i-2}^{n_i - 1}\int_0^t\frac{(t-s)^{k-(n_i-2)}}{(k-(n_i-2))!}e^{\lambda_{i}(t-s)}\widetilde{\gamma}_k(s)ds \\
+\displaystyle \sum_{k=n_i-1}^{n_i - 1}\int_0^t\frac{(t-s)^{k-(n_i-1)}}{(k-(n_i-1))!}e^{\lambda_{i}(t-s)}\widetilde{\gamma}_k(s)ds
 \end{array}
 \right)
-.
+. \eqno(2)
 \]
 
 Докажем вспомогательные утверждения.
@@ -99,6 +99,7 @@ x(t) = Y(t)x(0) + S
 \quad Для определенности рассмотрим случай $\displaystyle\lim_{t \rightarrow \infty}\dot{f}(t) = +\infty$, второй случай доказывается аналогично. Из определения предела следует, что $\exists t_0 : \forall \: \widetilde{t} > t_0 \Rightarrow \dot{f}(\widetilde{t}) > 1$, то есть \\ $\displaystyle\lim_{\Delta t \rightarrow 0}\frac{f(\widetilde{t} + \Delta t) - f(\widetilde{t})}{\Delta t} > 1 \Rightarrow \exists \Delta \widetilde{t}(\widetilde{t}) > 0 : \frac{f(\widetilde{t} + \Delta \widetilde{t}) - f(\widetilde{t})}{\Delta \widetilde{t}} > 1 \Rightarrow f(\widetilde{t} + \Delta \widetilde{t}) > f(\widetilde{t}) + \Delta \widetilde{t} \Rightarrow f(\widetilde{t} + n\Delta \widetilde{t}) > f(\widetilde{t}) + n\Delta \widetilde{t}, \;\; 	\forall \: n \in \mathds{N} \Rightarrow \lim_{t \rightarrow \infty}f(t) = \lim_{n \rightarrow \infty} f(\widetilde{t} + n\Delta \widetilde{t}) \geq f(\widetilde{t}) + \Delta\widetilde{t} \lim_{n \rightarrow \infty}n = +\infty \Rightarrow \lim_{t \rightarrow \infty}f(t) = +\infty$.
 \begin{flushright} $\square$ \end{flushright}
 
+\begin{comment}
 \quad \textbf{Предложение 2.} \textit{Пусть функция $f(t) \in C^1([0, \infty)) : \displaystyle\lim_{t \rightarrow \infty}f(t) = 0. \\ \exists t_0 : \forall \: t > t_0 \;\; f(t)$ - монотонна $\Rightarrow \displaystyle\lim_{t \rightarrow \infty}\dot{f}(t) = 0.$}
 
 \begin{center}
@@ -107,17 +108,95 @@ x(t) = Y(t)x(0) + S
 
 \quad Для определенности рассмотрим случай, когда $\exists t_0 : \forall \: t > t_0 \;\; f(t)$ - монотоннo убывает, то есть $\exists t_0 : \forall \: \widetilde{t} > t_0 \Rightarrow \dot{f}(\widetilde{t}) < 0$. Предположим, что $\displaystyle \exists \delta > 0 : \forall t_1>t_0 \;\; \exists \widetilde{t} > t_1 : \dot{f}(\widetilde{t}) < -\delta \Rightarrow \\ \forall \: n \in \mathds{N} \lim_{\Delta t \rightarrow 0}\frac{f(\widetilde{t} + n\Delta t) - f(\widetilde{t})}{n\Delta t} <-\delta \Rightarrow \exists\Delta \widetilde{t}(n, \widetilde{t}) > 0 : f(\widetilde{t} + n\Delta t) < f(\widetilde{t}) - n\delta\Delta\widetilde{t} \Rightarrow \\ \lim_{t \rightarrow \infty}f(t) = \lim_{n \rightarrow \infty} f(\widetilde{t} + n\Delta \widetilde{t}) < f(\widetilde{t}) - \lim_{n \rightarrow \infty}n\Delta \widetilde{t} = +\infty$
 
+\end{comment}
+\quad \textbf{Следствие.} \textit{Пусть функция $f(t) \in C([0, \infty))$ удовлетворяет условию $\displaystyle\lim_{t \rightarrow \infty}f(t) = \pm \infty$, то $\displaystyle\lim_{t \rightarrow \infty}\int_0^t(t-s)^k f(s)ds = \pm \infty \;\; \forall \: k \in \mathds{Z_+}$.}
 
-\quad \textbf{Лемма 1.} \textit{Пусть функция $f(t) \in C([0, \infty))$ удовлетворяет условию $\displaystyle\lim_{t \rightarrow \infty}f(t) = \pm \infty$, то $\displaystyle\lim_{t \rightarrow \infty}\int_0^t(t-s)^k f(s)ds = \pm \infty \;\; \forall \: k \in \mathds{Z_+}$, если же $\displaystyle \exists k \in \mathds{Z_+}: \lim_{t \rightarrow \infty}\int_0^t(t-s)^k f(s)ds = 0$ и, начиная с некоторого момента, $f(s)$ сохраняет знак, то $\displaystyle\lim_{t \rightarrow \infty}f(t) = 0$.}
+\begin{comment}
+если же $\displaystyle \exists k \in \mathds{Z_+}: \lim_{t \rightarrow \infty}\int_0^t(t-s)^k f(s)ds = 0$ и, начиная с некоторого момента, $f(s)$ сохраняет знак, то $\displaystyle\lim_{t \rightarrow \infty}f(t) = 0$.}
+\end{comment}
 
-\quad \textbf{Доказательство.}
+\begin{center}
+\textbf{Доказательство}
+\end{center}
 
-\quad Рассмотрим случай когда $\displaystyle\lim_{t \rightarrow \infty}f(t) = \pm \infty$. Воспользуемся следующим фактом: 
-\[\forall \: g(t) \in C^1([0, \infty)) : \displaystyle\lim_{t \rightarrow \infty}\dot{g}(t) = \pm \infty \Rightarrow \lim_{t \rightarrow \infty}g(t) = \pm \infty. \eqno(2)\] 
-Если в качестве $g(t)$ взять $\displaystyle\int_0^t f(s)ds$, то в силу $(2)$ получим, что $\displaystyle\lim_{t \rightarrow \infty}\int_0^tf(s)ds = \pm \infty$. Теперь возьмем в качестве $g(t) = \displaystyle\int_0^t (t-s)^kf(s)ds$, где $k \in \mathds{N}$ и предположим, что \\ $\displaystyle\lim_{t \rightarrow \infty}\int_0^t(t-s)^{k-1}f(s)ds = \pm \infty$, тогда из утверждения $(2)$ следует, что $\displaystyle\lim_{t \rightarrow \infty}\int_0^t(t-s)^kf(s)ds = \pm \infty$, тем самым мы доказали базу и шаг математической индукции.
+\quad По предложению 1. из условия $\displaystyle\lim_{t \rightarrow \infty}\int_0^t(t-s)^{k-1} f(s)ds = \pm \infty$ следует, что \\ $\displaystyle\lim_{t \rightarrow \infty}\int_0^t(t-s)^k f(s)ds = \pm \infty \;\; \forall \: k \in \mathds{N}$, и для $k = 0$ из $\displaystyle\lim_{t \rightarrow \infty}f(t) = \pm \infty$ следует $\displaystyle\lim_{t \rightarrow \infty}\int_0^t f(s)ds = \pm \infty$, тем самым доказаны шаг и база индукции.
+\begin{flushright} $\square$ \end{flushright}
 
-\quad Рассмотрим второй случай леммы. Докажем следующий факт:
+\quad \textbf{Лемма 1.} \textit{Пусть функция $f(t) \in C^1([0, \infty)) : \displaystyle\lim_{t \rightarrow \infty}\frac{\dot{f}(t)}{f(t)} = C \in \mathds{R}, C \neq \lambda$ и выполнено одно из следующих условий:}
 
+\[
+\begin{array}{cl}
+1)& \displaystyle \lim_{t \rightarrow \infty}e^{-\lambda t}f(t) = \pm \infty. \\
+2)& \left\{\begin{array}{l} \displaystyle\lim_{t \rightarrow \infty}\int_0^t\frac{(t-s)^m}{m!} e^{-\lambda s}f(s)ds = 0, \:\: \forall m = \overline{0,k} \\ 
+\displaystyle\lim_{t \rightarrow \infty}e^{-\lambda t}f(t) = 0
+\end{array}. \right.
+\end{array}, \textit{то}
+\]
+
+\[\displaystyle\lim_{t \rightarrow \infty} \frac{\displaystyle\int_0^t\frac{(t-s)^k}{k!} e^{\lambda (t-s)}f(s)ds}{f(t)} = \frac{1}{(C-\lambda)^{k+1}}\]
+
+\begin{center}
+\textbf{Доказательство}
+\end{center}
+
+\quad Докажем утверждение по методу математической индукции, рассмотрим случай когда\\ $m = 0$:
+$\displaystyle\lim_{t \rightarrow \infty} \frac{\displaystyle\int_0^t e^{\lambda (t-s)}f(s)ds}{f(t)} = \lim_{t \rightarrow \infty} \frac{\displaystyle\int_0^t e^{-\lambda s}f(s)ds}{e^{-\lambda t}f(t)} \triangleq $, если выполнено условие $2)$, то можно сразу применить правило Лапиталя, если выполнено условие $1)$, то, воспользовавшись следствием предложения 1., приходим к тому же выводу, следовательно
+$\triangleq \displaystyle \lim_{t \rightarrow \infty} \frac{e^{-\lambda t}f(t)}{-\lambda e^{-\lambda t}f(t) + e^{-\lambda t}\dot{f}(t)} = \lim_{t \rightarrow \infty} \frac{1}{-\lambda + \frac{\dot{f}(t)}{f(t)}} = \frac{1}{C-\lambda}$. База индукции доказана. 
+
+\quad Пусть $\displaystyle\lim_{t \rightarrow \infty} \frac{\displaystyle\int_0^t\frac{(t-s)^{m-1}}{(m-1)!} e^{\lambda (t-s)}f(s)ds}{f(t)} = \frac{1}{(C-\lambda)^m}$, тогда $\displaystyle\lim_{t \rightarrow \infty} \frac{\displaystyle\int_0^t\frac{(t-s)^{m}}{m!} e^{\lambda (t-s)}f(s)ds}{f(t)} = \\ = \lim_{t \rightarrow \infty} \frac{\displaystyle\int_0^t\frac{(t-s)^{m}}{m!} e^{-\lambda s}f(s)ds}{e^{-\lambda t}f(t)} \triangleq$, по тем же причинам можем применить правило Лапиталя и для данного предела $\triangleq \displaystyle\lim_{t \rightarrow \infty} \frac{\displaystyle\int_0^t\frac{(t-s)^{m-1}}{(m-1)!} e^{-\lambda s}f(s)ds}{-\lambda e^{-\lambda t}f(t) + e^{-\lambda t}\dot{f}(t)} = \lim_{t \rightarrow \infty} \frac{\displaystyle\int_0^t\frac{(t-s)^{m-1}}{(m-1)!} e^{-\lambda s}f(s)ds}{e^{-\lambda t}f(t)} \cdot \frac{e^{-\lambda t}f(t)}{-\lambda e^{-\lambda t}f(t) + e^{-\lambda t}\dot{f}(t)} = \\ = \lim_{t \rightarrow \infty} \frac{\displaystyle\int_0^t\frac{(t-s)^{m-1}}{(m-1)!} e^{\lambda (t-s)}f(s)ds}{f(t)}\cdot \frac{1}{-\lambda + \frac{\dot{f}(t)}{f(t)}} = \frac{1}{(C-\lambda)^m} \cdot \frac{1}{C-\lambda} = \frac{1}{(C-\lambda)^{m+1}}$. Шаг индукции доказан, а вместе с ним и лемма.
+\begin{flushright} $\square$ \end{flushright}
+
+\newpage
+
+\quad \textbf{Следствие.}  \textit{Если $f(t)$ удовлетворяет условиям леммы, то}
+\[\displaystyle\int_0^t\frac{(t-s)^k}{k!} e^{\lambda (t-s)}f(s)ds = \frac{f(t)}{(C-\lambda)^{k+1}} + o(f(t)).\]
+
+\quad Вернемся к представлению $(2)$, получим, что если все функции $\widetilde{\gamma}_k(t), k = \overline{1,n_i}$ удовлетворяют условиям леммы, то $x(t)$ можно представить как 
+
+\[
+x(t) = Y(t)x(0) + S
+\left(
+\begin{array}{c}
+\displaystyle \sum_{k=0}^{n_i - 1}\left(\frac{\widetilde{\gamma}_k(t)}{(C-\lambda_i)^{k+1}} + o(\widetilde{\gamma}_k(t))\right) \\
+\displaystyle \sum_{k=1}^{n_i - 1}\left(\frac{\widetilde{\gamma}_k(t)}{(C-\lambda_i)^{k}} + o(\widetilde{\gamma}_k(t))\right) \\
+\vdots \\
+\displaystyle \sum_{k=n_i-2}^{n_i - 1}\left(\frac{\widetilde{\gamma}_k(t)}{(C-\lambda_i)^{k+1-(n_i-2)}} + o(\widetilde{\gamma}_k(t))\right) \\
+\displaystyle \sum_{k=n_i-1}^{n_i - 1}\left(\frac{\widetilde{\gamma}_k(t)}{(C-\lambda_i)^{k+1-(n_i-1)}} + o(\widetilde{\gamma}_k(t))\right)
+\end{array}
+\right)
+.
+\]
+
+\quad Все $o(\widetilde{\gamma}_k(t))$ можно заменить на обозначение вектора о-малое , то есть просто обозначим 
+\[o(\widetilde{\gamma}(t)) = 
+\left(
+\begin{array}{c}
+\displaystyle \sum_{k=0}^{n_i - 1}o(\widetilde{\gamma}_k(t)) \\
+\displaystyle \sum_{k=1}^{n_i - 1}o(\widetilde{\gamma}_k(t)) \\
+\vdots \\
+\displaystyle \sum_{k=n_i-2}^{n_i - 1}o(\widetilde{\gamma}_k(t)) \\
+\displaystyle \sum_{k=n_i-1}^{n_i - 1}o(\widetilde{\gamma}_k(t))
+\end{array}
+\right),
+\]
+
+также введем матрицу $P_i$
+\[ P_i = \left(
+\begin{array}{ccccc}
+\displaystyle\frac{1}{C-\lambda_i} & \displaystyle\frac{1}{(C-\lambda_i)^2} & \dots & \displaystyle\frac{1}{(C-\lambda_i)^{n_i-1}} & \displaystyle\frac{1}{(C-\lambda_i)^{n_i}} \\
+0 & \displaystyle\frac{1}{C-\lambda_i} & \dots & \displaystyle\frac{1}{(C-\lambda_i)^{n_i-2}} & \displaystyle\frac{1}{(C-\lambda_i)^{n_i-1}} \\
+\vdots & \vdots & \ddots & \vdots & \vdots\\
+0 & 0 & \dots & \displaystyle\frac{1}{C-\lambda_i} & \displaystyle\frac{1}{(C-\lambda_i)^2} \\
+0 & 0 & \dots & 0 & \displaystyle\frac{1}{C-\lambda_i} \\
+\end{array}
+\right).
+\]
+\newpage
+
+\quad По итогу $x(t)$ можно представить как
+\[
+x(t) = Y(t)x(0) + S\left(P_i \: \widetilde{\gamma}(t) + o(\widetilde{\gamma}(t))\right) = Y(t)x(0) + S P_i S^{-1} \gamma(t) + S \left( o(\widetilde{\gamma}(t))\right)
+\]
 
 
 
