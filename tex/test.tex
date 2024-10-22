@@ -211,9 +211,10 @@ AY(t)x(0) + S P^{\widetilde{\gamma}} S^{-1} \dot{\gamma}(t) + S \left( \dot{o}(\
 S \left( \dot{o}(\widetilde{\gamma}(t))\right) = SDP^{\widetilde{\gamma}} S^{-1} \gamma(t) - S P^{\widetilde{\gamma}} S^{-1} \dot{\gamma}(t) + SD\left( o(\widetilde{\gamma}(t))\right) + \gamma(t)
 \\
 \dot{o}(\widetilde{\gamma}(t)) = DP^{\widetilde{\gamma}} S^{-1} \gamma(t) - P^{\widetilde{\gamma}} S^{-1} \dot{\gamma}(t) + D\left( o(\widetilde{\gamma}(t))\right) + S^{-1} \gamma(t)
-\\
-\dot{o}(\widetilde{\gamma}(t)) = D\left( o(\widetilde{\gamma}(t))\right) + \left(DP^{\widetilde{\gamma}} + \mathds{E}\right) S^{-1} \gamma(t) - P^{\widetilde{\gamma}} S^{-1} \dot{\gamma}(t).
 \end{array}
+\]
+\[
+\dot{o}(\widetilde{\gamma}(t)) = D\left( o(\widetilde{\gamma}(t))\right) + \left(DP^{\widetilde{\gamma}} + \mathds{E}\right) S^{-1} \gamma(t) - P^{\widetilde{\gamma}} S^{-1} \dot{\gamma}(t). \eqno(4)
 \]
 
 \quad Рассмотрим $\left(DP^{\widetilde{\gamma}} + \mathds{E}\right)$, Н.У.О. рассмотрим произведение $J_{\lambda_i} P_i^{\widetilde{\gamma}}$
@@ -265,15 +266,57 @@ S \left( \dot{o}(\widetilde{\gamma}(t))\right) = SDP^{\widetilde{\gamma}} S^{-1}
 матрица $\left(DP^{\widetilde{\gamma}} + \mathds{E}\right)$ состоит из матричных блоков на диагонали вида 
 $\left(J_{\lambda_i} P_i^{\widetilde{\gamma}} + \mathds{E}\right)$, обозначим $\left(DP^{\widetilde{\gamma}} + \mathds{E}\right) = \overline{P^{\widetilde{\gamma}}}$. 
 
-\quad \textbf{Определение 1.}
+\quad \textbf{Определение 1.} \textit{Пусть $f(t), g(t) \in \mathds{R}^n$ - вектор-функции скалярного аргумента. Будем говорить, что $f(t) = o(g(t))$, если $\displaystyle\lim_{t \rightarrow \infty}\frac{\displaystyle\max_j(f_j(t))}{\displaystyle\max_j(g_j(t))} = 0$, где $\displaystyle\max_j(f_j(t))$ есть такая $f_{j_m}(t)$, что $\displaystyle \overline{\lim_{t \rightarrow \infty}}\left|\frac{f_k(t)}{f_{j_m}(t)}\right| \leq 1 \:\: \forall k=\overline{1, n}$. Аналогично будем говорить, что $f(t) = O(g(t))$, если \\ $\displaystyle\lim_{t \rightarrow \infty}\frac{\displaystyle\max_j(f_j(t))}{\displaystyle\max_j(g_j(t))} = C \in \mathds{R}$.}
 
-\quad Рассмотрим $\overline{P^{\widetilde{\gamma}}}\widetilde{\gamma}(t) - P^{\widetilde{\gamma}}\dot{\widetilde{\gamma}}(t) = \theta(t)$, покажем, что $\displaystyle\lim_{t \rightarrow \infty}\left|\frac{\theta_k(t)}{\displaystyle\max_j(\widetilde{\gamma}_j(t))}\right| = 0 \\ \forall k=\overline{0, n}$, где $\displaystyle\max_j(\widetilde{\gamma}_j(t))$ есть такая $\widetilde{\gamma}_{j_m}(t)$, что $\displaystyle \overline{\lim_{t \rightarrow \infty}}\left|\frac{\widetilde{\gamma}_k(t)}{\widetilde{\gamma}_{j_m}(t)}\right| \leq 1 \:\: \forall k=\overline{0, n}$.
+\quad \textbf{Замечание.} \textit{Не сложно проверить, что отношения $o$ и $O$ являются транзитивными отношениями.}
+\\
+
+\quad Пусть $\overline{P^{\widetilde{\gamma}}}\widetilde{\gamma}(t) - P^{\widetilde{\gamma}}\dot{\widetilde{\gamma}}(t) = \theta(t)$, покажем, что $\theta(t) = o(\widetilde{\gamma}(t)))$, для этого докажем, \\ что $\displaystyle\lim_{t \rightarrow \infty}\left|\frac{\theta_k(t)}{\displaystyle\max_j(\widetilde{\gamma}_j(t))}\right| = 0  \:\: \forall k=\overline{1, n}$.
 
 \quad Рассмотрим $\displaystyle\lim_{t \rightarrow \infty}\left|\frac{\theta_1(t)}{\displaystyle\max_j(\widetilde{\gamma}_j(t))}\right| = \lim_{t \rightarrow \infty}\left|\frac{\displaystyle \sum_{k=0}^{n_1-1}\frac{C_k \widetilde{\gamma}_k(t) - \dot{\widetilde{\gamma}}_k(t)}{(C_k-\lambda_1)^{k+1}}}{\displaystyle\max_j(\widetilde{\gamma}_j(t))}\right| = \lim_{t \rightarrow \infty}\left| \displaystyle \sum_{k=0}^{n_1-1}\frac{\widetilde{\gamma}_k(t)}{\displaystyle\max_j(\widetilde{\gamma}_j(t))} \cdot \frac{C_k \ - \displaystyle \frac{\dot{\widetilde{\gamma}}_k(t)}{\widetilde{\gamma}_k(t)}}{(C_k-\lambda_1)^{k+1}}\right|$, получаем, что \[0 \leq \displaystyle\lim_{t \rightarrow \infty}\left|\frac{\theta_1(t)}{\displaystyle\max_j(\widetilde{\gamma}_j(t))}\right| \leq \lim_{t \rightarrow \infty} \displaystyle \sum_{k=0}^{n_1-1}\left|\frac{\widetilde{\gamma}_k(t)}{\displaystyle\max_j(\widetilde{\gamma}_j(t))} \cdot \frac{C_k \ - \displaystyle \frac{\dot{\widetilde{\gamma}}_k(t)}{\widetilde{\gamma}_k(t)}}{(C_k-\lambda_1)^{k+1}}\right| \leq \lim_{t \rightarrow \infty} \displaystyle \sum_{k=0}^{n_1-1}\left| \frac{C_k \ - \displaystyle \frac{\dot{\widetilde{\gamma}}_k(t)}{\widetilde{\gamma}_k(t)}}{(C_k-\lambda_1)^{k+1}}\right| = 0,\]
 
 абсолютно аналогичное доказательство для любого другого $k = \overline{2, n}$, с точностью до пределов суммирования.
 
-\quad Из того, что $\displaystyle\lim_{t \rightarrow \infty}\left|\frac{\theta_k(t)}{\displaystyle\max_j(\widetilde{\gamma}_j(t))}\right| = 0 \:\: \forall k=\overline{0, n} \Rightarrow \displaystyle\lim_{t \rightarrow \infty}\frac{\theta_k(t)}{\displaystyle\max_j(\widetilde{\gamma}_j(t))} = 0 \:\: \forall k=\overline{0, n} \Rightarrow \\ \Rightarrow \lim_{t \rightarrow \infty}\frac{\displaystyle\max_j(\theta_j(t))}{\displaystyle\max_j(\widetilde{\gamma}_j(t))} = 0 \Rightarrow$ будем говорить, что порядок $\theta(t)$
+\quad Получаем цепочку следований \[
+\begin{array}{c}
+\displaystyle\lim_{t \rightarrow \infty}\left|\frac{\theta_k(t)}{\displaystyle\max_j(\widetilde{\gamma}_j(t))}\right| = 0 \:\: \forall k=\overline{1, n} \Rightarrow \displaystyle\lim_{t \rightarrow \infty}\frac{\theta_k(t)}{\displaystyle\max_j(\widetilde{\gamma}_j(t))} = 0 \:\: \forall k=\overline{1, n} \Rightarrow \\ 
+\Rightarrow \displaystyle\lim_{t \rightarrow \infty}\frac{\displaystyle\max_j(\theta_j(t))}{\displaystyle\max_j(\widetilde{\gamma}_j(t))} = 0 \Rightarrow \theta(t) = o(\widetilde{\gamma}(t))).
+\end{array}
+\]
+
+\quad Вернемся к уравнению $(4)$, запишем его в виде 
+\[
+\dot{o}(\widetilde{\gamma}(t)) = D\left( o(\widetilde{\gamma}(t))\right) + \theta(t), \eqno(5)
+\]
+данное уравнение задает функцию $o(\widetilde{\gamma}(t))$ с начальным условием из $(3)$: $o(\widetilde{\gamma}(t))(0) = -P^{\widetilde{\gamma}}S^{-1}\gamma(0)$. Решением уравнения $(5)$ есть
+\[
+o(\widetilde{\gamma}(t)) = e^{Dt}\left( o(\widetilde{\gamma}(t))(0) + \displaystyle \int_0^te^{-Ds} \theta(s)ds \right) = e^{Dt}o(\widetilde{\gamma}(t))(0) + \int_0^te^{D(t-s)} \theta(s)ds.
+\]
+
+\quad Если $\theta(t)$ удовлетворяет условиям леммы, то $o(\widetilde{\gamma}(t))$ можно представить как
+\[
+o(\widetilde{\gamma}(t)) = e^{Dt}o(\widetilde{\gamma}(t))(0) + P^{\theta} \: \theta(t) + o(\theta(t)). \eqno(6)
+\]
+Подставим $(6)$ в $(3)$ и $(5)$, получим 
+\[
+\dot{o}(\theta(t)) = D\left(o(\theta(t))\right) + \overline{P}^{\theta} \: \theta(t) - P^{\theta} \: \dot{\theta}(t) = D\left(o(\theta(t))\right) + \theta^{(2)}(t)
+\]
+\[
+\begin{array}{c}
+x(t) = Y(t)x(0) + S P^{\widetilde{\gamma}} S^{-1} \gamma(t) + S \left( e^{Dt}o(\widetilde{\gamma}(t))(0) + P^{\theta} \: \theta(t) + o(\theta(t))\right) = \\
+= S e^{Dt} \left( S^{-1} x(0) + o(\widetilde{\gamma}(t))(0) \right) + S \left( P^{\widetilde{\gamma}} S^{-1} \gamma(t) + P^{\theta} \theta(t) + o(\theta(t)\right) = \\
+= S e^{Dt} \left( S^{-1} x(0) -P^{\widetilde{\gamma}}S^{-1}\gamma(0) \right) + S \left( P^{\widetilde{\gamma}} S^{-1} \gamma(t) + P^{\theta} \theta(t) + o(\theta(t))\right).
+\end{array}
+\]
+
+Как видим, уравнение на $o(\theta(t))$ имеет тот же вид, что и уравнение $(5)$, с начальным условием $o(\theta(t))(0) = - P^{\theta} \theta(0)$.
+
+\quad Предположим, что все $\theta^{(j)}(t), j = \overline{1, k} \;\; (\theta^{(1)}(t) = \theta(t))$ удовлетворяют условию леммы, тогда $x(t)$ можно представить как 
+\[
+x(t) = S e^{Dt} \left( S^{-1} x(0) -P^{\widetilde{\gamma}}S^{-1}\gamma(0) - \sum_{j=1}^{k-1} P^{\theta^{(j)}} \theta^{(j)}(0)\right) + S \left( P^{\widetilde{\gamma}} S^{-1} \gamma(t) + \sum_{j=1}^{k} P^{\theta^{(j)}} \theta^{(j)}(t) + o\left(\theta^{(k)}(t)\right) \right)
+\]
+
+
 
 
 
