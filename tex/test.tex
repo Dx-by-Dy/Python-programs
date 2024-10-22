@@ -151,17 +151,17 @@ $\triangleq \displaystyle \lim_{t \rightarrow \infty} \frac{e^{-\lambda t}f(t)}{
 \quad \textbf{Следствие.}  \textit{Если $f(t)$ удовлетворяет условиям леммы, то}
 \[\displaystyle\int_0^t\frac{(t-s)^k}{k!} e^{\lambda (t-s)}f(s)ds = \frac{f(t)}{(C-\lambda)^{k+1}} + o(f(t)).\]
 
-\quad Вернемся к представлению $(2)$, получим, что если все функции $\widetilde{\gamma}_k(t), k = \overline{1,n_i}$ удовлетворяют условиям леммы, то $x(t)$ можно представить как 
+\quad Вернемся к представлению $(2)$, получим, что если все функции $\widetilde{\gamma}_k(t), k = \overline{1,n_i}$ удовлетворяют условиям леммы $\left(\displaystyle\lim_{t \rightarrow \infty}\frac{\dot{\widetilde{\gamma}}_k(t)}{\widetilde{\gamma}_k(t)} = C_k \neq \lambda_i \:\: \forall k=\overline{0, n_i-1}\right)$, то $x(t)$ можно представить как 
 
 \[
 x(t) = Y(t)x(0) + S
 \left(
 \begin{array}{c}
-\displaystyle \sum_{k=0}^{n_i - 1}\left(\frac{\widetilde{\gamma}_k(t)}{(C-\lambda_i)^{k+1}} + o(\widetilde{\gamma}_k(t))\right) \\
-\displaystyle \sum_{k=1}^{n_i - 1}\left(\frac{\widetilde{\gamma}_k(t)}{(C-\lambda_i)^{k}} + o(\widetilde{\gamma}_k(t))\right) \\
+\displaystyle \sum_{k=0}^{n_i - 1}\left(\frac{\widetilde{\gamma}_k(t)}{(C_k-\lambda_i)^{k+1}} + o(\widetilde{\gamma}_k(t))\right) \\
+\displaystyle \sum_{k=1}^{n_i - 1}\left(\frac{\widetilde{\gamma}_k(t)}{(C_k-\lambda_i)^{k}} + o(\widetilde{\gamma}_k(t))\right) \\
 \vdots \\
-\displaystyle \sum_{k=n_i-2}^{n_i - 1}\left(\frac{\widetilde{\gamma}_k(t)}{(C-\lambda_i)^{k+1-(n_i-2)}} + o(\widetilde{\gamma}_k(t))\right) \\
-\displaystyle \sum_{k=n_i-1}^{n_i - 1}\left(\frac{\widetilde{\gamma}_k(t)}{(C-\lambda_i)^{k+1-(n_i-1)}} + o(\widetilde{\gamma}_k(t))\right)
+\displaystyle \sum_{k=n_i-2}^{n_i - 1}\left(\frac{\widetilde{\gamma}_k(t)}{(C_k-\lambda_i)^{k+1-(n_i-2)}} + o(\widetilde{\gamma}_k(t))\right) \\
+\displaystyle \sum_{k=n_i-1}^{n_i - 1}\left(\frac{\widetilde{\gamma}_k(t)}{(C_k-\lambda_i)^{k+1-(n_i-1)}} + o(\widetilde{\gamma}_k(t))\right)
 \end{array}
 \right)
 .
@@ -180,14 +180,14 @@ x(t) = Y(t)x(0) + S
 \right),
 \]
 
-также введем матрицу $P_i$
-\[ P_i = \left(
+также введем матрицу $P_i^{\widetilde{\gamma}}$
+\[ P_i^{\widetilde{\gamma}} = \left(
 \begin{array}{ccccc}
-\displaystyle\frac{1}{C-\lambda_i} & \displaystyle\frac{1}{(C-\lambda_i)^2} & \dots & \displaystyle\frac{1}{(C-\lambda_i)^{n_i-1}} & \displaystyle\frac{1}{(C-\lambda_i)^{n_i}} \\
-0 & \displaystyle\frac{1}{C-\lambda_i} & \dots & \displaystyle\frac{1}{(C-\lambda_i)^{n_i-2}} & \displaystyle\frac{1}{(C-\lambda_i)^{n_i-1}} \\
+\displaystyle\frac{1}{C_0-\lambda_i} & \displaystyle\frac{1}{(C_1-\lambda_i)^2} & \dots & \displaystyle\frac{1}{(C_{n_i-2}-\lambda_i)^{n_i-1}} & \displaystyle\frac{1}{(C_{n_i-1}-\lambda_i)^{n_i}} \\
+0 & \displaystyle\frac{1}{C_1-\lambda_i} & \dots & \displaystyle\frac{1}{(C_{n_i-2}-\lambda_i)^{n_i-2}} & \displaystyle\frac{1}{(C_{n_i-1}-\lambda_i)^{n_i-1}} \\
 \vdots & \vdots & \ddots & \vdots & \vdots\\
-0 & 0 & \dots & \displaystyle\frac{1}{C-\lambda_i} & \displaystyle\frac{1}{(C-\lambda_i)^2} \\
-0 & 0 & \dots & 0 & \displaystyle\frac{1}{C-\lambda_i} \\
+0 & 0 & \dots & \displaystyle\frac{1}{C_{n_i-2}-\lambda_i} & \displaystyle\frac{1}{(C_{n_i-1}-\lambda_i)^2} \\
+0 & 0 & \dots & 0 & \displaystyle\frac{1}{C_{n_i-1}-\lambda_i} \\
 \end{array}
 \right).
 \]
@@ -195,16 +195,85 @@ x(t) = Y(t)x(0) + S
 
 \quad По итогу $x(t)$ можно представить как
 \[
-x(t) = Y(t)x(0) + S\left(P_i \: \widetilde{\gamma}(t) + o(\widetilde{\gamma}(t))\right) = Y(t)x(0) + S P_i S^{-1} \gamma(t) + S \left( o(\widetilde{\gamma}(t))\right)
+x(t) = Y(t)x(0) + S\left(P_i^{\widetilde{\gamma}} \: \widetilde{\gamma}(t) + o(\widetilde{\gamma}(t))\right) = Y(t)x(0) + S P_i^{\widetilde{\gamma}} S^{-1} \gamma(t) + S \left( o(\widetilde{\gamma}(t))\right).
 \]
 
+\quad Индекс $i$ напоминает нам, что мы работали только с одной Жордановой клеткой матрицы $D$, обобщая наши рассуждения на полный вид матрицы $D$, матрица $P_i^{\widetilde{\gamma}}$ заменится на матрицу $P^{\widetilde{\gamma}}$, у которой по диагонали стоят соответствующие матрицы $P_i^{\widetilde{\gamma}}$, то есть получим, что
+\[
+x(t) = Y(t)x(0) + S P^{\widetilde{\gamma}} S^{-1} \gamma(t) + S \left( o(\widetilde{\gamma}(t))\right). \eqno(3)
+\]
 
+\quad Подставим представление $(3)$ в систему $(1)$, получим
+\[
+\begin{array}{c}
+AY(t)x(0) + S P^{\widetilde{\gamma}} S^{-1} \dot{\gamma}(t) + S \left( \dot{o}(\widetilde{\gamma}(t))\right) = AY(t)x(0) + A S P^{\widetilde{\gamma}} S^{-1} \gamma(t) + AS\left( o(\widetilde{\gamma}(t))\right) + \gamma(t)
+\\
+S \left( \dot{o}(\widetilde{\gamma}(t))\right) = SDP^{\widetilde{\gamma}} S^{-1} \gamma(t) - S P^{\widetilde{\gamma}} S^{-1} \dot{\gamma}(t) + SD\left( o(\widetilde{\gamma}(t))\right) + \gamma(t)
+\\
+\dot{o}(\widetilde{\gamma}(t)) = DP^{\widetilde{\gamma}} S^{-1} \gamma(t) - P^{\widetilde{\gamma}} S^{-1} \dot{\gamma}(t) + D\left( o(\widetilde{\gamma}(t))\right) + S^{-1} \gamma(t)
+\\
+\dot{o}(\widetilde{\gamma}(t)) = D\left( o(\widetilde{\gamma}(t))\right) + \left(DP^{\widetilde{\gamma}} + \mathds{E}\right) S^{-1} \gamma(t) - P^{\widetilde{\gamma}} S^{-1} \dot{\gamma}(t).
+\end{array}
+\]
 
+\quad Рассмотрим $\left(DP^{\widetilde{\gamma}} + \mathds{E}\right)$, Н.У.О. рассмотрим произведение $J_{\lambda_i} P_i^{\widetilde{\gamma}}$
+\[
+\left(
+\begin{array}{ccccc}
+\lambda_i & 1 & \dots & 0 & 0 \\
+0 & \lambda_i & \dots & 0 & 0 \\
+\vdots & \vdots & \ddots & \vdots & \vdots\\
+0 & 0 & \dots & \lambda_i & 1 \\
+0 & 0 & \dots & 0 & \lambda_i \\
+\end{array}
+\right)
+\left(
+\begin{array}{ccccc}
+\displaystyle\frac{1}{C_0-\lambda_i} & \displaystyle\frac{1}{(C_1-\lambda_i)^2} & \dots & \displaystyle\frac{1}{(C_{n_i-2}-\lambda_i)^{n_i-1}} & \displaystyle\frac{1}{(C_{n_i-1}-\lambda_i)^{n_i}} \\
+0 & \displaystyle\frac{1}{C_1-\lambda_i} & \dots & \displaystyle\frac{1}{(C_{n_i-2}-\lambda_i)^{n_i-2}} & \displaystyle\frac{1}{(C_{n_i-1}-\lambda_i)^{n_i-1}} \\
+\vdots & \vdots & \ddots & \vdots & \vdots\\
+0 & 0 & \dots & \displaystyle\frac{1}{C_{n_i-2}-\lambda_i} & \displaystyle\frac{1}{(C_{n_i-1}-\lambda_i)^2} \\
+0 & 0 & \dots & 0 & \displaystyle\frac{1}{C_{n_i-1}-\lambda_i} \\
+\end{array}
+\right) = 
+\]
+\[
+= \left(
+\begin{array}{ccccc}
+\displaystyle\frac{\lambda_i}{C_0-\lambda_i} & \displaystyle\frac{C_1}{(C_1-\lambda_i)^2} & \dots & \displaystyle\frac{C_{n_i-2}}{(C_{n_i-2}-\lambda_i)^{n_i-1}} & \displaystyle\frac{C_{n_i-1}}{(C_{n_i-1}-\lambda_i)^{n_i}} \\
+0 & \displaystyle\frac{\lambda_i}{C_1-\lambda_i} & \dots & \displaystyle\frac{C_{n_i-2}}{(C_{n_i-2}-\lambda_i)^{n_i-2}} & \displaystyle\frac{C_{n_i-1}}{(C_{n_i-1}-\lambda_i)^{n_i-1}} \\
+\vdots & \vdots & \ddots & \vdots & \vdots\\
+0 & 0 & \dots & \displaystyle\frac{\lambda_i}{C_{n_i-2}-\lambda_i} & \displaystyle\frac{C_{n_i-1}}{(C_{n_i-1}-\lambda_i)^2} \\
+0 & 0 & \dots & 0 & \displaystyle\frac{\lambda_i}{C_{n_i-1}-\lambda_i} \\
+\end{array}
+\right),
+\]
 
+соответственно $\left(J_{\lambda_i} P_i^{\widetilde{\gamma}} + \mathds{E}\right)$ есть
+\[
+\left(
+\begin{array}{ccccc}
+\displaystyle\frac{C_0}{C_0-\lambda_i} & \displaystyle\frac{C_1}{(C_1-\lambda_i)^2} & \dots & \displaystyle\frac{C_{n_i-2}}{(C_{n_i-2}-\lambda_i)^{n_i-1}} & \displaystyle\frac{C_{n_i-1}}{(C_{n_i-1}-\lambda_i)^{n_i}} \\
+0 & \displaystyle\frac{C_1}{C_1-\lambda_i} & \dots & \displaystyle\frac{C_{n_i-2}}{(C_{n_i-2}-\lambda_i)^{n_i-2}} & \displaystyle\frac{C_{n_i-1}}{(C_{n_i-1}-\lambda_i)^{n_i-1}} \\
+\vdots & \vdots & \ddots & \vdots & \vdots\\
+0 & 0 & \dots & \displaystyle\frac{C_{n_i-2}}{C_{n_i-2}-\lambda_i} & \displaystyle\frac{C_{n_i-1}}{(C_{n_i-1}-\lambda_i)^2} \\
+0 & 0 & \dots & 0 & \displaystyle\frac{C_{n_i-1}}{C_{n_i-1}-\lambda_i} \\
+\end{array}
+\right),
+\]
 
-\begin{comment}
-\quad Пусть система $(1)$ асимптотически устойчива по Ляпунову, из чего следует, что $\forall \: \lambda_{i}, \; i=\overline{1, n}$ - собственного числа матрицы $A$, выполняется $Re(\lambda_{i}) < 0$.
-\end{comment} 
+матрица $\left(DP^{\widetilde{\gamma}} + \mathds{E}\right)$ состоит из матричных блоков на диагонали вида 
+$\left(J_{\lambda_i} P_i^{\widetilde{\gamma}} + \mathds{E}\right)$, обозначим $\left(DP^{\widetilde{\gamma}} + \mathds{E}\right) = \overline{P^{\widetilde{\gamma}}}$. 
+
+\quad \textbf{Определение 1.}
+
+\quad Рассмотрим $\overline{P^{\widetilde{\gamma}}}\widetilde{\gamma}(t) - P^{\widetilde{\gamma}}\dot{\widetilde{\gamma}}(t) = \theta(t)$, покажем, что $\displaystyle\lim_{t \rightarrow \infty}\left|\frac{\theta_k(t)}{\displaystyle\max_j(\widetilde{\gamma}_j(t))}\right| = 0 \\ \forall k=\overline{0, n}$, где $\displaystyle\max_j(\widetilde{\gamma}_j(t))$ есть такая $\widetilde{\gamma}_{j_m}(t)$, что $\displaystyle \overline{\lim_{t \rightarrow \infty}}\left|\frac{\widetilde{\gamma}_k(t)}{\widetilde{\gamma}_{j_m}(t)}\right| \leq 1 \:\: \forall k=\overline{0, n}$.
+
+\quad Рассмотрим $\displaystyle\lim_{t \rightarrow \infty}\left|\frac{\theta_1(t)}{\displaystyle\max_j(\widetilde{\gamma}_j(t))}\right| = \lim_{t \rightarrow \infty}\left|\frac{\displaystyle \sum_{k=0}^{n_1-1}\frac{C_k \widetilde{\gamma}_k(t) - \dot{\widetilde{\gamma}}_k(t)}{(C_k-\lambda_1)^{k+1}}}{\displaystyle\max_j(\widetilde{\gamma}_j(t))}\right| = \lim_{t \rightarrow \infty}\left| \displaystyle \sum_{k=0}^{n_1-1}\frac{\widetilde{\gamma}_k(t)}{\displaystyle\max_j(\widetilde{\gamma}_j(t))} \cdot \frac{C_k \ - \displaystyle \frac{\dot{\widetilde{\gamma}}_k(t)}{\widetilde{\gamma}_k(t)}}{(C_k-\lambda_1)^{k+1}}\right|$, получаем, что \[0 \leq \displaystyle\lim_{t \rightarrow \infty}\left|\frac{\theta_1(t)}{\displaystyle\max_j(\widetilde{\gamma}_j(t))}\right| \leq \lim_{t \rightarrow \infty} \displaystyle \sum_{k=0}^{n_1-1}\left|\frac{\widetilde{\gamma}_k(t)}{\displaystyle\max_j(\widetilde{\gamma}_j(t))} \cdot \frac{C_k \ - \displaystyle \frac{\dot{\widetilde{\gamma}}_k(t)}{\widetilde{\gamma}_k(t)}}{(C_k-\lambda_1)^{k+1}}\right| \leq \lim_{t \rightarrow \infty} \displaystyle \sum_{k=0}^{n_1-1}\left| \frac{C_k \ - \displaystyle \frac{\dot{\widetilde{\gamma}}_k(t)}{\widetilde{\gamma}_k(t)}}{(C_k-\lambda_1)^{k+1}}\right| = 0,\]
+
+абсолютно аналогичное доказательство для любого другого $k = \overline{2, n}$, с точностью до пределов суммирования.
+
+\quad Из того, что $\displaystyle\lim_{t \rightarrow \infty}\left|\frac{\theta_k(t)}{\displaystyle\max_j(\widetilde{\gamma}_j(t))}\right| = 0 \:\: \forall k=\overline{0, n} \Rightarrow \displaystyle\lim_{t \rightarrow \infty}\frac{\theta_k(t)}{\displaystyle\max_j(\widetilde{\gamma}_j(t))} = 0 \:\: \forall k=\overline{0, n} \Rightarrow \\ \Rightarrow \lim_{t \rightarrow \infty}\frac{\displaystyle\max_j(\theta_j(t))}{\displaystyle\max_j(\widetilde{\gamma}_j(t))} = 0 \Rightarrow$ будем говорить, что порядок $\theta(t)$
 
 
 
