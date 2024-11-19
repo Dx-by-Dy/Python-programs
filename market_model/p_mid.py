@@ -37,13 +37,16 @@ def gen_data(size, scale_exp, scale_pois):
 rng = np.random.default_rng()
 
 size_ask, size_bid = 700, 1000
-time_data_ask, price_data_ask = gen_data(size_ask, 5, 0.4)
+time_data_ask, price_data_ask = gen_data(size_ask, 5, 1)
 time_data_bid, price_data_bid = gen_data(size_bid, 5, 0.5)
 
 conf_ask = conf_interval(np.log(time_data_ask), np.sqrt(price_data_ask))
 conf_bid = conf_interval(np.log(time_data_bid), np.sqrt(price_data_bid))
 full_int = ((conf_ask[0] - conf_bid[0]) / 2, (conf_ask[1] - conf_bid[1]) / 2)
 
-
+'''
 print(full_int)
 print(tuple(np.int16(np.round(full_int))))
+'''
+
+print(rng.poisson(0.1, 100))
