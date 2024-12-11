@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.stats import f
 
- 
+
 def conf_interval(time_interval, price_shift, p=0.95):
     '''
     Функция для подсчета доверительного интервала с вероятностью p.
@@ -44,9 +44,6 @@ conf_ask = conf_interval(np.log(time_data_ask), np.sqrt(price_data_ask))
 conf_bid = conf_interval(np.log(time_data_bid), np.sqrt(price_data_bid))
 full_int = ((conf_ask[0] - conf_bid[0]) / 2, (conf_ask[1] - conf_bid[1]) / 2)
 
-'''
+
 print(full_int)
 print(tuple(np.int16(np.round(full_int))))
-'''
-
-print(rng.poisson(0.1, 100))

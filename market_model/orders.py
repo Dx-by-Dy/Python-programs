@@ -6,6 +6,7 @@ class Config():
     scale_of_time_distibution = 4
 
     count_of_price_levels = 10
+    probability_of_binomial_distibution_for_price_levels = 0.5
 
     probability_of_ask_side = 0.5
 
@@ -19,7 +20,7 @@ class Config():
     mean_volume_for_limit_orders = 15
     standard_deviation_of_volume_for_limit_orders = 1
     probability_of_FOK_type = 0.1
-    probability_of_IOK_type = 0.6
+    probability_of_IOC_type = 0.6
 
     intensity_of_distibution_levels_for_cancel_order = 1
     mean_volume_for_cancel_orders = 40
@@ -68,6 +69,8 @@ class OrderGenerator():
         self.time = config.time
 
         self.count_of_price_levels = config.count_of_price_levels
+        self.probability_of_binomial_distibution_for_price_levels = config.probability_of_binomial_distibution_for_price_levels
+
 
         self.probability_of_ask_side = config.probability_of_ask_side
 
@@ -80,7 +83,7 @@ class OrderGenerator():
         self.mean_volume_for_limit_orders = config.mean_volume_for_limit_orders
         self.standard_deviation_of_volume_for_limit_orders = config.standard_deviation_of_volume_for_limit_orders
         self.probability_of_FOK_type = config.probability_of_FOK_type
-        self.probability_of_IOK_type = config.probability_of_IOK_type
+        self.probability_of_IOC_type = config.probability_of_IOC_type
         self.intensity_of_distibution_levels_for_limit_order = config.intensity_of_distibution_levels_for_limit_order
 
         self.intensity_of_distibution_levels_for_cancel_order = config.intensity_of_distibution_levels_for_cancel_order
@@ -88,30 +91,39 @@ class OrderGenerator():
         self.standard_deviation_of_volume_for_cancel_orders = config.standard_deviation_of_volume_for_cancel_orders
 
     def generate_market_order(self):
-        side_type = "ask" if self.rng.uniform(0, 1, 1)[0] < self.probability_of_ask_side else "bid"
+        side_type = "ask"
         volume = round(self.rng.normal(self.mean_volume_for_market_orders, self.standard_deviation_of_volume_for_market_orders, 1)[0], 3)
         return  MarketOrder(self.time, side_type, volume)
     
     def generate_limit_order(self):
-        side_type = "ask" if self.rng.uniform(0, 1, 1)[0] < self.probability_of_ask_side else "bid"
         type_limit_order_id = self.rng.uniform(0, 1, 1)[0]
         if type_limit_order_id < self.probability_of_FOK_type:
             type_limit_order_id = "FOK"
-        elif type_limit_order_id < self.probability_of_IOK_type + self.probability_of_FOK_type:
-            type_limit_order_id = "IOK"
+        elif type_limit_order_id < self.probability_of_IOC_type + self.probability_of_FOK_type:
+            type_limit_order_id = "IOC"
         else:
             type_limit_order_id = "GTC"
 
+        level = self.rng.binomial(2 * self.count_of_price_levels - 1, self.probability_of_binomial_distibution_for_price_levels)
+        if level - self.count_of_price_levels < 0:
+            side_type = "bid"
+        else:
+            side_type = "ask"
+
         is_trade = True if self.rng.uniform(0, 1, 1)[0] < self.probability_of_trade_for_limit_order else False
-        level = min(self.rng.poisson(self.intensity_of_distibution_levels_for_limit_order, 1)[0], self.count_of_price_levels - 1)
         volume = round(self.rng.normal(self.mean_volume_for_limit_orders, self.standard_deviation_of_volume_for_limit_orders, 1)[0], 3)
-        return LimitOrder(self.time, side_type, is_trade, level, volume, type_limit_order_id)
+        return LimitOrder(self.time, side_type, is_trade, level % self.count_of_price_levels, volume, type_limit_order_id)
     
     def generate_cancel_order(self):
-        side_type = "ask" if self.rng.uniform(0, 1, 1)[0] < self.probability_of_ask_side else "bid"
-        level = max(self.count_of_price_levels - 1 - self.rng.poisson(self.intensity_of_distibution_levels_for_cancel_order, 1)[0], 0)
+
+        level = self.rng.binomial(2 * self.count_of_price_levels - 1, self.probability_of_binomial_distibution_for_price_levels)
+        if level - self.count_of_price_levels < 0:
+            side_type = "bid"
+        else:
+            side_type = "ask"
+
         volume = round(self.rng.normal(self.mean_volume_for_cancel_orders, self.standard_deviation_of_volume_for_cancel_orders, 1)[0], 3)
-        return CancelOrder(self.time, side_type, level, volume)
+        return CancelOrder(self.time, side_type, level % self.count_of_price_levels, volume)
 
     def generate_order(self):
         self.time += round(self.rng.exponential(self.scale_of_time_distibution, 1)[0], 3)
@@ -124,3 +136,6 @@ class OrderGenerator():
             return self.generate_limit_order()
         else:
             return self.generate_cancel_order()
+        
+
+#поменять все на decimal
