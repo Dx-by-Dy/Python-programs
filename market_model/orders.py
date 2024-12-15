@@ -3,24 +3,24 @@ import numpy as np
 
 class Config():
     time = 0
-    scale_of_time_distibution = 4
+    scale_of_time_distibution = 0.2
 
     count_of_price_levels = 9
     probability_of_binomial_distibution_for_price_levels = 0.5
 
     probability_of_ask_side = 0.5
 
-    probability_of_market_order = 0.1
-    mean_volume_for_market_orders = 10
+    probability_of_market_order = 0.16
+    mean_volume_for_market_orders = 30
     standard_deviation_of_volume_for_market_orders = 1
 
     probability_of_limit_order = 0.8
-    probability_of_trade_for_limit_order = 0.1
+    probability_of_trade_for_limit_order = 0.05
     intensity_of_distibution_levels_for_limit_order = 0.1
     mean_volume_for_limit_orders = 10
     standard_deviation_of_volume_for_limit_orders = 1
     probability_of_FOK_type = 0.1
-    probability_of_IOC_type = 0.3
+    probability_of_IOC_type = 0.1
 
     intensity_of_distibution_levels_for_cancel_order = 1
     mean_volume_for_cancel_orders = 10
@@ -130,7 +130,7 @@ class OrderGenerator():
         return CancelOrder(self.time, side_type, level, volume)
 
     def generate_order(self):
-        self.time += round(self.rng.exponential(self.scale_of_time_distibution, 1)[0], 3)
+        self.time = round(self.time + self.rng.exponential(self.scale_of_time_distibution, 1)[0], 3)
 
         order_type_id = self.rng.uniform(0, 1, 1)[0]
 
@@ -143,3 +143,4 @@ class OrderGenerator():
         
 
 #поменять все на decimal
+#генерировать все заранее, так быстрее

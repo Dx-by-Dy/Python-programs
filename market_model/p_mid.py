@@ -6,8 +6,9 @@ def conf_interval(time_interval, price_shift, p=0.95):
     '''
     Функция для подсчета доверительного интервала с вероятностью p.
     time_interval - массив, состоящий из интервалов времени между трейдами одной стороны, предварительно прологорифмированный.
-    price_shift - абсолютные значения смещения цены сделки в трейдах относительно последней известной p_best и предварительно взятые под корнем,
-        то есть sqrt(abs(p_t - p_best)), где p_t - цена сделки.
+    price_shift - абсолютные значения смещения цены сделки в трейдах относительно последней известной p_best
+        предварительно взятые под корнем и имеющие соответвующий знак,
+        то есть sign(p_t - p_best) * sqrt(abs(p_t - p_best)), где p_t - цена сделки.
     '''
 
     num_of_obs = len(time_interval)                                                                                   # количество элементов в выборке
@@ -22,7 +23,8 @@ def conf_interval(time_interval, price_shift, p=0.95):
     covariance_coef = np.sqrt(variance_time) / np.sqrt(variance_time * variance_price - covariance_time_price ** 2)   # поправочный коэффициент ковариации
     hotelling_stat = np.sqrt(2 * (num_of_obs - 1) / (num_of_obs * (num_of_obs - 2)) * f.ppf(p, 2, num_of_obs - 2))    # статистика Хотеллинга через квантиль распределения Фишера
 
-    return (price_mean - hotelling_stat / covariance_coef) ** 2, (price_mean + hotelling_stat / covariance_coef) ** 2 # итоговый доверительный интервал для смещения p_best
+    low, upp = price_mean - hotelling_stat / covariance_coef, price_mean + hotelling_stat / covariance_coef
+    return np.sign(low) * low ** 2, np.sign(upp) * upp ** 2                                                           # итоговый доверительный интервал для смещения p_best
 
 
 # далее код для симуляции входных данных
