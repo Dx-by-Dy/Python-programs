@@ -138,9 +138,12 @@ class Orderbook():
 
     def model(self):
         trade_log = self.TI.batchs[-1]
-        if len(trade_log) < 10:
+
+        
+        if len(trade_log) < 3:
             print("Enough data!")
             return
+        
 
         times, prices = [], []
         last_time = self.last_time_reinit
@@ -152,7 +155,7 @@ class Orderbook():
         inter = conf_interval(times, prices)
         inter = list(np.int16(np.round(inter)))
 
-        print(inter[0], inter[1], self.ask_price_best_bias, (inter[0] - inter[1]) / 2, inter[0] <= self.ask_price_best_bias <= inter[1], abs((inter[1] - inter[0]) / self.ask_price_best_bias))
+        print(inter[0], inter[1], self.ask_price_best_bias, (inter[0] - inter[1]) / 2, inter[0] <= self.ask_price_best_bias <= inter[1], abs((inter[1] - inter[0]) / self.ask_price_best_bias), len(trade_log))
 
     def insert_order(self, order):
 
@@ -178,10 +181,8 @@ class Orderbook():
         self.TI.log = []
 
     def start(self):
-        for i in range(10 ** 5):
+        for _ in range(10 ** 5):
             self.insert_order(self.OG.generate_order())
-            if i > 0 and i % 10000 == 0:
-                self.TI.print_last_bias()
 
 
 O = Orderbook(OrderGenerator(Config(), np.random.default_rng(42)), TradeInfo())

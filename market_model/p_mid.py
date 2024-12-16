@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.stats import f
 
+np.seterr(invalid='ignore')
 
 def conf_interval(time_interval, price_shift, p=0.95):
     '''
@@ -27,25 +28,26 @@ def conf_interval(time_interval, price_shift, p=0.95):
     return np.sign(low) * low ** 2, np.sign(upp) * upp ** 2                                                           # итоговый доверительный интервал для смещения p_best
 
 
-# далее код для симуляции входных данных
-def gen_data(size, scale_exp, scale_pois):
-    time_data = rng.exponential(scale=scale_exp, size=size)
-    data_pois = []
-    for i in range(size):
-        data_pois += [min(rng.poisson(lam=scale_pois / time_data[i], size=1)[0], 10)]
-    return time_data, np.array(data_pois)
+if __name__ == "__main__":
+    # далее код для симуляции входных данных
+    def gen_data(size, scale_exp, scale_pois):
+        time_data = rng.exponential(scale=scale_exp, size=size)
+        data_pois = []
+        for i in range(size):
+            data_pois += [min(rng.poisson(lam=scale_pois / time_data[i], size=1)[0], 10)]
+        return time_data, np.array(data_pois)
 
 
-rng = np.random.default_rng()
+    rng = np.random.default_rng()
 
-size_ask, size_bid = 700, 1000
-time_data_ask, price_data_ask = gen_data(size_ask, 5, 1)
-time_data_bid, price_data_bid = gen_data(size_bid, 5, 0.5)
+    size_ask, size_bid = 700, 1000
+    time_data_ask, price_data_ask = gen_data(size_ask, 5, 1)
+    time_data_bid, price_data_bid = gen_data(size_bid, 5, 0.5)
 
-conf_ask = conf_interval(np.log(time_data_ask), np.sqrt(price_data_ask))
-conf_bid = conf_interval(np.log(time_data_bid), np.sqrt(price_data_bid))
-full_int = ((conf_ask[0] - conf_bid[0]) / 2, (conf_ask[1] - conf_bid[1]) / 2)
+    conf_ask = conf_interval(np.log(time_data_ask), np.sqrt(price_data_ask))
+    conf_bid = conf_interval(np.log(time_data_bid), np.sqrt(price_data_bid))
+    full_int = ((conf_ask[0] - conf_bid[0]) / 2, (conf_ask[1] - conf_bid[1]) / 2)
 
 
-print(full_int)
-print(tuple(np.int16(np.round(full_int))))
+    print(full_int)
+    print(tuple(np.int16(np.round(full_int))))

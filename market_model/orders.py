@@ -5,12 +5,12 @@ class Config():
     time = 0
     scale_of_time_distibution = 0.2
 
-    count_of_price_levels = 9
+    count_of_price_levels = 21
     probability_of_binomial_distibution_for_price_levels = 0.5
 
     probability_of_ask_side = 0.5
 
-    probability_of_market_order = 0.16
+    probability_of_market_order = 0.10
     mean_volume_for_market_orders = 30
     standard_deviation_of_volume_for_market_orders = 1
 
@@ -71,7 +71,6 @@ class OrderGenerator():
         self.count_of_price_levels = config.count_of_price_levels
         self.probability_of_binomial_distibution_for_price_levels = config.probability_of_binomial_distibution_for_price_levels
 
-
         self.probability_of_ask_side = config.probability_of_ask_side
 
         self.probability_of_market_order = config.probability_of_market_order
@@ -90,13 +89,61 @@ class OrderGenerator():
         self.mean_volume_for_cancel_orders = config.mean_volume_for_cancel_orders
         self.standard_deviation_of_volume_for_cancel_orders = config.standard_deviation_of_volume_for_cancel_orders
 
+        self.unif, self.iter_unif = [], 0
+        self.bin, self.iter_bin = [], 0
+        self.expo, self.iter_expo = [], 0
+        self.norm_market, self.norm_limit, self.norm_cancel, self.iter_norm_market, self.iter_norm_limit, self.iter_norm_cancel = [], [], [], 0, 0, 0
+        self.size_gen = 1000000
+
+    def get_uniform(self):
+        if len(self.unif) == 0 or len(self.unif) <= self.iter_unif:
+            self.unif = self.rng.uniform(0, 1, self.size_gen)
+            self.iter_unif = 0
+        self.iter_unif += 1
+        return self.unif[self.iter_unif - 1]
+    
+    def get_normal_market(self):
+        if len(self.norm_market) == 0 or len(self.norm_market) <= self.iter_norm_market:
+            self.norm_market = np.round(self.rng.normal(self.mean_volume_for_market_orders, self.standard_deviation_of_volume_for_market_orders, self.size_gen), 3)
+            self.iter_norm_market = 0
+        self.iter_norm_market += 1
+        return self.norm_market[self.iter_norm_market - 1]
+    
+    def get_normal_limit(self):
+        if len(self.norm_limit) == 0 or len(self.norm_limit) <= self.iter_norm_limit:
+            self.norm_limit = np.round(self.rng.normal(self.mean_volume_for_limit_orders, self.standard_deviation_of_volume_for_limit_orders, self.size_gen), 3)
+            self.iter_norm_limit = 0
+        self.iter_norm_limit += 1
+        return self.norm_limit[self.iter_norm_limit - 1]
+    
+    def get_normal_cancel(self):
+        if len(self.norm_cancel) == 0 or len(self.norm_cancel) <= self.iter_norm_cancel:
+            self.norm_cancel = np.round(self.rng.normal(self.mean_volume_for_cancel_orders, self.standard_deviation_of_volume_for_cancel_orders, self.size_gen), 3)
+            self.iter_norm_cancel = 0
+        self.iter_norm_cancel += 1
+        return self.norm_cancel[self.iter_norm_cancel - 1]
+    
+    def get_binomial(self):
+        if len(self.bin) == 0 or len(self.bin) <= self.iter_bin:
+            self.bin = self.rng.binomial(2 * self.count_of_price_levels - 1, self.probability_of_binomial_distibution_for_price_levels, self.size_gen)
+            self.iter_bin = 0
+        self.iter_bin += 1
+        return self.bin[self.iter_bin - 1]
+    
+    def get_exponential(self):
+        if len(self.expo) == 0 or len(self.expo) <= self.iter_expo:
+            self.expo = self.rng.exponential(self.scale_of_time_distibution, self.size_gen)
+            self.iter_expo = 0
+        self.iter_expo += 1
+        return self.expo[self.iter_expo - 1]
+
     def generate_market_order(self):
-        side_type = "ask" if self.rng.uniform(0, 1, 1)[0] < self.probability_of_ask_side else "bid"
-        volume = round(self.rng.normal(self.mean_volume_for_market_orders, self.standard_deviation_of_volume_for_market_orders, 1)[0], 3)
+        side_type = "ask" if self.get_uniform() < self.probability_of_ask_side else "bid"
+        volume = self.get_normal_market()
         return  MarketOrder(self.time, side_type, volume)
     
     def generate_limit_order(self):
-        type_limit_order_id = self.rng.uniform(0, 1, 1)[0]
+        type_limit_order_id = self.get_uniform()
         if type_limit_order_id < self.probability_of_FOK_type:
             type_limit_order_id = "FOK"
         elif type_limit_order_id < self.probability_of_IOC_type + self.probability_of_FOK_type:
@@ -104,7 +151,7 @@ class OrderGenerator():
         else:
             type_limit_order_id = "GTC"
 
-        level = self.rng.binomial(2 * self.count_of_price_levels - 1, self.probability_of_binomial_distibution_for_price_levels)
+        level = self.get_binomial()
         if level - self.count_of_price_levels < 0:
             side_type = "bid"
             level = self.count_of_price_levels - level % self.count_of_price_levels - 1
@@ -112,13 +159,13 @@ class OrderGenerator():
             side_type = "ask"
             level = level % self.count_of_price_levels
 
-        is_trade = True if self.rng.uniform(0, 1, 1)[0] < self.probability_of_trade_for_limit_order else False
-        volume = round(self.rng.normal(self.mean_volume_for_limit_orders, self.standard_deviation_of_volume_for_limit_orders, 1)[0], 3)
+        is_trade = True if self.get_uniform() < self.probability_of_trade_for_limit_order else False
+        volume = self.get_normal_limit()
         return LimitOrder(self.time, side_type, is_trade, level, volume, type_limit_order_id)
     
     def generate_cancel_order(self):
 
-        level = self.rng.binomial(2 * self.count_of_price_levels - 1, self.probability_of_binomial_distibution_for_price_levels)
+        level = self.get_binomial()
         if level - self.count_of_price_levels < 0:
             side_type = "bid"
             level = self.count_of_price_levels - level % self.count_of_price_levels - 1
@@ -126,13 +173,13 @@ class OrderGenerator():
             side_type = "ask"
             level = level % self.count_of_price_levels
 
-        volume = round(self.rng.normal(self.mean_volume_for_cancel_orders, self.standard_deviation_of_volume_for_cancel_orders, 1)[0], 3)
+        volume = self.get_normal_cancel()
         return CancelOrder(self.time, side_type, level, volume)
 
     def generate_order(self):
-        self.time = round(self.time + self.rng.exponential(self.scale_of_time_distibution, 1)[0], 3)
+        self.time = round(self.time + self.get_exponential(), 3)
 
-        order_type_id = self.rng.uniform(0, 1, 1)[0]
+        order_type_id = self.get_uniform()
 
         if order_type_id < self.probability_of_market_order:
             return self.generate_market_order()
@@ -143,4 +190,3 @@ class OrderGenerator():
         
 
 #поменять все на decimal
-#генерировать все заранее, так быстрее
