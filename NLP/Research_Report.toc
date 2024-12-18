@@ -1,0 +1,19 @@
+\babel@toc {russian}{}\relax 
+\contentsline {section}{\numberline {1}Введение}{3}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Актуальность работы}{3}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Цель и задачи работы}{3}{subsection.1.2}%
+\contentsline {section}{\numberline {2}Различные метрики символьных последовательностей}{4}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Расстояние Левенштейна}{4}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Расстояние Джаро}{5}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Расстояние Джаро-Винклера}{6}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Результаты практического тестирования метрик}{6}{subsection.2.4}%
+\contentsline {section}{\numberline {3}Представление словарей в памяти}{12}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Префиксное дерево}{12}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Детерминированный ациклический конечный автомат}{12}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Пример использования префиксного дерева в алгоритме лемматизации}{14}{subsection.3.3}%
+\contentsline {section}{\numberline {4}Современные алгоритмы лемматизации}{17}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Библиотека pymorphy2}{17}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Алгоритм MyStem}{18}{subsection.4.2}%
+\contentsline {section}{\numberline {5}Заключение}{20}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Результаты работы}{20}{subsection.5.1}%
+\contentsline {section}{\numberline {6}Список использованных источников}{20}{section.6}%
