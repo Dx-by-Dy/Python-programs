@@ -33,6 +33,9 @@ class Orderbook():
        self.last_time_reinit = 0
        self.time_reinit = 100
        self.ask_price_best_bias = 0
+       self.file = open("res.txt", "a")
+
+       self.file.write("Best player price | Best model price lower | Best model price upper | Real price | Delta execution | Num of obs\n")
 
     def __str__(self):
         text = "Ask side\n"
@@ -96,8 +99,7 @@ class Orderbook():
                     setattr(self, LO.side, orderbook_side)
                     for trade in trades:
                         self.TI.add_trade(trade[0], trade[1], trade[2], trade[3])
-
-                
+ 
             self.change_midprice(LO.side)
 
         else:
@@ -130,20 +132,28 @@ class Orderbook():
 
         self.change_midprice(MO.side)
 
+    def player_best_price(self):
+        if len(self.TI.batchs[-1]) == 0:
+            return 0
+        return self.TI.batchs[-1][-1][1]
+
+    def write_res(self, res_model, player_best_price):
+        self.file.write(f"{player_best_price} {res_model[0]} {res_model[1]} {self.ask_price_best_bias} {res_model[3]} {res_model[2]}\n")
+
     def reinit(self):
         self.TI.reinit()
-        self.model()
+        self.write_res(self.model(), self.player_best_price())
         self.last_time_reinit += self.time_reinit
         self.ask_price_best_bias = 0
 
     def model(self):
         trade_log = self.TI.batchs[-1]
 
-        
         if len(trade_log) < 3:
-            print("Enough data!")
-            return
-        
+            if len(trade_log) == 0:
+                return 0, 0, 0, self.time_reinit
+            else:
+                return trade_log[-1][1], trade_log[-1][1], len(trade_log), self.last_time_reinit + self.time_reinit - trade_log[-1][0]
 
         times, prices = [], []
         last_time = self.last_time_reinit
@@ -153,9 +163,9 @@ class Orderbook():
             prices += [np.sign(trade[1]) * np.sqrt(abs(trade[1]))]
 
         inter = conf_interval(times, prices)
-        inter = list(np.int16(np.round(inter)))
+        #inter = list(np.int16(np.round(inter)))
 
-        print(inter[0], inter[1], self.ask_price_best_bias, (inter[0] - inter[1]) / 2, inter[0] <= self.ask_price_best_bias <= inter[1], abs((inter[1] - inter[0]) / self.ask_price_best_bias), len(trade_log))
+        return inter[0], inter[1], len(trade_log), self.last_time_reinit + self.time_reinit - trade_log[-1][0]
 
     def insert_order(self, order):
 

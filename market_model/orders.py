@@ -3,20 +3,20 @@ import numpy as np
 
 class Config():
     time = 0
-    scale_of_time_distibution = 0.2
+    scale_of_time_distibution = 0.4
 
     count_of_price_levels = 21
     probability_of_binomial_distibution_for_price_levels = 0.5
 
     probability_of_ask_side = 0.5
 
-    probability_of_market_order = 0.10
+    probability_of_market_order = 0.01
     mean_volume_for_market_orders = 30
     standard_deviation_of_volume_for_market_orders = 1
 
-    probability_of_limit_order = 0.8
+    probability_of_limit_order = 0.7
     probability_of_trade_for_limit_order = 0.05
-    intensity_of_distibution_levels_for_limit_order = 0.1
+    # intensity_of_distibution_levels_for_limit_order = 0.1
     mean_volume_for_limit_orders = 10
     standard_deviation_of_volume_for_limit_orders = 1
     probability_of_FOK_type = 0.1
@@ -83,7 +83,7 @@ class OrderGenerator():
         self.standard_deviation_of_volume_for_limit_orders = config.standard_deviation_of_volume_for_limit_orders
         self.probability_of_FOK_type = config.probability_of_FOK_type
         self.probability_of_IOC_type = config.probability_of_IOC_type
-        self.intensity_of_distibution_levels_for_limit_order = config.intensity_of_distibution_levels_for_limit_order
+        # self.intensity_of_distibution_levels_for_limit_order = config.intensity_of_distibution_levels_for_limit_order
 
         self.intensity_of_distibution_levels_for_cancel_order = config.intensity_of_distibution_levels_for_cancel_order
         self.mean_volume_for_cancel_orders = config.mean_volume_for_cancel_orders
@@ -164,7 +164,6 @@ class OrderGenerator():
         return LimitOrder(self.time, side_type, is_trade, level, volume, type_limit_order_id)
     
     def generate_cancel_order(self):
-
         level = self.get_binomial()
         if level - self.count_of_price_levels < 0:
             side_type = "bid"
