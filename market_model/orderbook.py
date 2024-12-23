@@ -1,5 +1,6 @@
 from orders import *
 from p_mid import conf_interval
+from tqdm import tqdm
 
 class TradeInfo():
     def __init__(self) -> None:
@@ -25,7 +26,7 @@ class TradeInfo():
 
 
 class Orderbook():
-    def __init__(self, OG : OrderGenerator, TI : TradeInfo) -> None:
+    def __init__(self, OG : OrderGenerator, TI : TradeInfo, file_name) -> None:
        self.ask = [0 for _ in range(Config.count_of_price_levels)]
        self.bid = [0 for _ in range(Config.count_of_price_levels)]
        self.OG = OG
@@ -33,9 +34,9 @@ class Orderbook():
        self.last_time_reinit = 0
        self.time_reinit = 100
        self.ask_price_best_bias = 0
-       self.file = open("res.txt", "a")
+       self.file = open(f"{file_name}.csv", "a")
 
-       self.file.write("Best player price | Best model price lower | Best model price upper | Real price | Delta execution | Num of obs\n")
+       self.file.write("Best player price,Best model price lower,Best model price upper,Real price,Delta execution,Num of obs\n")
 
     def __str__(self):
         text = "Ask side\n"
@@ -138,7 +139,7 @@ class Orderbook():
         return self.TI.batchs[-1][-1][1]
 
     def write_res(self, res_model, player_best_price):
-        self.file.write(f"{player_best_price} {res_model[0]} {res_model[1]} {self.ask_price_best_bias} {res_model[3]} {res_model[2]}\n")
+        self.file.write(f"{player_best_price},{res_model[0]},{res_model[1]},{self.ask_price_best_bias},{res_model[3]},{res_model[2]}\n")
 
     def reinit(self):
         self.TI.reinit()
@@ -163,7 +164,6 @@ class Orderbook():
             prices += [np.sign(trade[1]) * np.sqrt(abs(trade[1]))]
 
         inter = conf_interval(times, prices)
-        #inter = list(np.int16(np.round(inter)))
 
         return inter[0], inter[1], len(trade_log), self.last_time_reinit + self.time_reinit - trade_log[-1][0]
 
@@ -191,14 +191,15 @@ class Orderbook():
         self.TI.log = []
 
     def start(self):
-        for _ in range(10 ** 5):
+        for _ in tqdm(range(10 ** 7)):
             self.insert_order(self.OG.generate_order())
 
+for i in range(1, 21):
+    Config.scale_of_time_distibution = i / 2
+    Config.probability_of_market_order = (i - 1) / 100 + 0.002
+    Config.probability_of_limit_order = 0.8
+    Config.probability_of_trade_for_limit_order = 0.01
 
-O = Orderbook(OrderGenerator(Config(), np.random.default_rng(42)), TradeInfo())
-
-O.init()
-print(O)
-
-O.start()
-print(O)
+    O = Orderbook(OrderGenerator(Config(), np.random.default_rng(42)), TradeInfo(), f"res_{i}_5")
+    O.init()
+    O.start()

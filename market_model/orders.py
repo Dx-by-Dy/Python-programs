@@ -3,18 +3,18 @@ import numpy as np
 
 class Config():
     time = 0
-    scale_of_time_distibution = 0.4
+    scale_of_time_distibution = 8
 
     count_of_price_levels = 21
     probability_of_binomial_distibution_for_price_levels = 0.5
 
     probability_of_ask_side = 0.5
 
-    probability_of_market_order = 0.01
+    probability_of_market_order = 0.16
     mean_volume_for_market_orders = 30
     standard_deviation_of_volume_for_market_orders = 1
 
-    probability_of_limit_order = 0.7
+    probability_of_limit_order = 0.8
     probability_of_trade_for_limit_order = 0.05
     # intensity_of_distibution_levels_for_limit_order = 0.1
     mean_volume_for_limit_orders = 10

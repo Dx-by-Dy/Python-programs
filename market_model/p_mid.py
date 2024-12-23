@@ -25,8 +25,7 @@ def conf_interval(time_interval, price_shift, p=0.95):
     hotelling_stat = np.sqrt(2 * (num_of_obs - 1) / (num_of_obs * (num_of_obs - 2)) * f.ppf(p, 2, num_of_obs - 2))    # статистика Хотеллинга через квантиль распределения Фишера
 
     low, upp = price_mean - hotelling_stat / covariance_coef, price_mean + hotelling_stat / covariance_coef
-    return np.sign(low) * low ** 2, np.sign(upp) * upp ** 2                                                           # итоговый доверительный интервал для смещения p_best
-
+    return np.sign(low) * low ** 2, np.sign(upp) * upp ** 2                                                          # итоговый доверительный интервал для смещения p_best
 
 if __name__ == "__main__":
     # далее код для симуляции входных данных
